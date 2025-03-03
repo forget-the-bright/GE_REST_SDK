@@ -3,13 +3,15 @@ package io.github.forget_the_bright.ge.constant;
 import io.github.forget_the_bright.ge.constant.child.ParamPosition;
 import io.github.forget_the_bright.ge.entity.collectors.CollectorEntity;
 import lombok.Getter;
-import org.springframework.http.HttpMethod;
+import cn.hutool.http.Method;
+import lombok.ToString;
 
 /**
  * Collectors 模块接口枚举 (Collectors API Enum)
  * <p>
  * 该枚举类定义了 Collectors 模块的所有接口及其相关信息。
  */
+@ToString
 @Getter
 public enum CollectorsApiEnum {
 
@@ -21,7 +23,7 @@ public enum CollectorsApiEnum {
     SET_AZURE_LOG_LEVEL(
             "设置 Azure 调试信息日志级别",
             "/v1/collector/azureloglevel",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -35,7 +37,7 @@ public enum CollectorsApiEnum {
     BUFFER_CONTROL(
             "删除或移动缓冲区文件",
             "/v1/collector/buffercontrol",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -49,7 +51,7 @@ public enum CollectorsApiEnum {
     CREATE_NEW_INSTANCE(
             "创建收集器实例",
             "/v1/collector/createnewinstance",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
@@ -63,7 +65,7 @@ public enum CollectorsApiEnum {
     DELETE_COLLECTOR_INSTANCE(
             "删除收集器实例",
             "/v1/collector/deleteinstance",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -77,7 +79,7 @@ public enum CollectorsApiEnum {
     DELETE_OFFLINE_INSTANCE(
             "删除离线收集器实例",
             "/v1/collector/deleteofflineinstance",
-            HttpMethod.DELETE,
+            Method.DELETE,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -91,7 +93,7 @@ public enum CollectorsApiEnum {
     COLLECTOR_DETAILS(
             "查看收集器详细信息",
             "/v1/collector/details",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.NONE,
             ParamPosition.NONE,
             null
@@ -105,7 +107,7 @@ public enum CollectorsApiEnum {
     EDIT_INSTANCE(
             "更新收集器实例",
             "/v1/collector/editinstance",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
@@ -119,7 +121,7 @@ public enum CollectorsApiEnum {
     HISTORIAN_NODE_CHANGE(
             "更新收集器的服务器节点",
             "/v1/collector/historiannodechange",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -133,7 +135,7 @@ public enum CollectorsApiEnum {
     INSTANCE_DETAILS(
             "获取收集器实例详细信息",
             "/v1/collector/instancedetails/{interfaceName}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -147,7 +149,7 @@ public enum CollectorsApiEnum {
     MESSAGE_COMPRESSION(
             "启用或禁用消息压缩",
             "/v1/collector/messagecompression",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -161,7 +163,7 @@ public enum CollectorsApiEnum {
     COLLECTOR_RUNNING_MODE(
             "查看收集器运行模式",
             "/v1/collector/mode/{interfaceName}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -175,7 +177,7 @@ public enum CollectorsApiEnum {
     PAUSE_COLLECTION(
             "暂停收集器数据收集",
             "/v1/collector/pausecollection/{interfaceName}",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -189,7 +191,7 @@ public enum CollectorsApiEnum {
     REBUILD_COLLECTORS_LIST(
             "重建收集器列表",
             "/v1/collector/rebuild/{interfaceName}",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -203,7 +205,7 @@ public enum CollectorsApiEnum {
     RESTART_COLLECTOR(
             "重新启动收集器",
             "/v1/collector/restart",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -217,7 +219,7 @@ public enum CollectorsApiEnum {
     RESUME_COLLECTION(
             "恢复收集器数据收集",
             "/v1/collector/resumecollection/{interfaceName}",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -231,7 +233,7 @@ public enum CollectorsApiEnum {
     SET_DEBUG_MODE(
             "设置收集器调试模式",
             "/v1/collector/setdebugmode",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -245,7 +247,7 @@ public enum CollectorsApiEnum {
     START_COLLECTOR(
             "启动收集器",
             "/v1/collector/start",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -259,7 +261,7 @@ public enum CollectorsApiEnum {
     COLLECTOR_STATUS(
             "获取收集器状态",
             "/v1/collector/status/{interfaceName}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -273,7 +275,7 @@ public enum CollectorsApiEnum {
     STOP_COLLECTOR(
             "停止收集器",
             "/v1/collector/stop",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
@@ -287,7 +289,7 @@ public enum CollectorsApiEnum {
     COLLECTOR_VERSION(
             "获取收集器的版本号",
             "/v1/collector/version",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
@@ -301,7 +303,7 @@ public enum CollectorsApiEnum {
     COLLECTOR_VERSION_BY_PATH(
             "获取收集器的版本号（路径参数）",
             "/v1/collector/version/{interfaceName}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -315,7 +317,7 @@ public enum CollectorsApiEnum {
     COLLECTOR_MANAGER_LIST(
             "获取收集器关联的代理机器列表",
             "/v1/collectormanagerlist",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.NONE,
             ParamPosition.NONE,
             null
@@ -329,7 +331,7 @@ public enum CollectorsApiEnum {
     INSTALL_COMPONENT_DETAILS(
             "获取收集器所在计算机安装组件的详细信息",
             "/v1/installcomponentdetails/{collectorType}/{collectorSubType}/{machine}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -343,7 +345,7 @@ public enum CollectorsApiEnum {
     LOCAL_OPC_AE_SERVERS(
             "获取指定机器上安装的 OPC 警报和事件服务器列表",
             "/v1/localopcaeservers/{machine}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -357,7 +359,7 @@ public enum CollectorsApiEnum {
     LOCAL_OPC_HDA_SERVERS(
             "查看指定机器上安装的 OPC HDA 服务器列表",
             "/v1/localopchdaservers/{machine}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -371,7 +373,7 @@ public enum CollectorsApiEnum {
     LOCAL_OPC_SERVERS(
             "查看指定机器上安装的 OPC 服务器列表",
             "/v1/localopcservers/{machine}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -385,7 +387,7 @@ public enum CollectorsApiEnum {
     OFFLINE_COLLECTORS(
             "获取离线收集器列表",
             "/v1/offlinecollectors",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.NONE,
             ParamPosition.NONE,
             null
@@ -393,12 +395,12 @@ public enum CollectorsApiEnum {
 
     private final String desc;
     private final String path;
-    private final HttpMethod method;
+    private final Method method;
     private final ParamPosition primaryParamPosition;
     private final ParamPosition secondaryParamPosition;
     private final Class<?> entityType;
 
-    CollectorsApiEnum(String desc, String path, HttpMethod method,
+    CollectorsApiEnum(String desc, String path, Method method,
                       ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
                       Class<?> entityType) {
         this.desc = desc;
@@ -407,11 +409,5 @@ public enum CollectorsApiEnum {
         this.primaryParamPosition = primaryParamPosition;
         this.secondaryParamPosition = secondaryParamPosition;
         this.entityType = entityType;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Name: %s, Method: %s, Path: %s, Description: %s, PrimaryParamPosition: %s, SecondaryParamPosition: %s, EntityType: %s",
-                name(), method, path, desc, primaryParamPosition, secondaryParamPosition, entityType.getSimpleName());
     }
 }

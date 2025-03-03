@@ -1,10 +1,11 @@
 package io.github.forget_the_bright.ge.entity.alarm;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 /**
  * 报警删除备份实体 (Alarm Delete Backup Entity)
@@ -12,8 +13,7 @@ import lombok.ToString;
  * 该实体类用于定义创建报警数据副本时所需的参数。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class AlarmDeleteBackupEntity {
 
@@ -40,7 +40,7 @@ public class AlarmDeleteBackupEntity {
      * 释义: 定义报警或事件的时间范围的结束时间点。
      */
     @JSONField(name = "EndTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String endTime;
+    private Date endTime;
 
     /**
      * 是否压缩报警 (Should Zip Alarms)
@@ -65,5 +65,5 @@ public class AlarmDeleteBackupEntity {
      * 释义: 定义报警或事件的时间范围的起始时间点。
      */
     @JSONField(name = "StartTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String startTime;
+    private Date startTime;
 }

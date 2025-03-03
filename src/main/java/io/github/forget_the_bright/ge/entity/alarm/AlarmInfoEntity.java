@@ -1,11 +1,11 @@
 package io.github.forget_the_bright.ge.entity.alarm;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,8 +14,7 @@ import java.util.List;
  * 该实体类用于表示报警的详细信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class AlarmInfoEntity {
 
@@ -30,7 +29,7 @@ public class AlarmInfoEntity {
      * 释义: 表示报警被用户或系统确认的时间点。
      */
     @JSONField(name = "AckTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String ackTime;
+    private Date ackTime;
 
     /**
      * 操作员 (Actor)
@@ -91,7 +90,7 @@ public class AlarmInfoEntity {
      * 释义: 表示报警状态结束的时间点。
      */
     @JSONField(name = "EndTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String endTime;
+    private Date endTime;
 
     /**
      * 事件类别 (Event Category)
@@ -176,7 +175,7 @@ public class AlarmInfoEntity {
      * 释义: 表示报警状态开始的时间点。
      */
     @JSONField(name = "StartTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String startTime;
+    private Date startTime;
 
     /**
      * 状态转换时间 (State Transition Time)
@@ -189,7 +188,7 @@ public class AlarmInfoEntity {
      * 释义: 表示报警状态从一个状态转换到另一个状态的时间点。
      */
     @JSONField(name = "StateTransitionTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String stateTransitionTime;
+    private Date stateTransitionTime;
 
     /**
      * 子条件名称 (Sub Condition Name)
@@ -226,7 +225,7 @@ public class AlarmInfoEntity {
      * 释义: 表示报警发生的确切时间点。
      */
     @JSONField(name = "TimeStamp", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String timeStamp;
+    private Date timeStamp;
 
     /**
      * 厂商属性列表 (Vendor Attributes)

@@ -1,10 +1,11 @@
 package io.github.forget_the_bright.ge.entity.data;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 /**
  * 趋势实体 (Trend Entity)
@@ -12,8 +13,7 @@ import lombok.ToString;
  * 该实体类用于表示趋势数据的相关参数。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class TrendEntity {
 
@@ -64,7 +64,7 @@ public class TrendEntity {
      * 释义: 表示查询的时间范围结束的时间点。
      */
     @JSONField(name = "end", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String endTime;
+    private Date endTime;
 
     /**
      * 过滤表达式 (Filter Expression)
@@ -137,7 +137,7 @@ public class TrendEntity {
      * 释义: 表示查询的时间范围开始的时间点。
      */
     @JSONField(name = "start", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String startTime;
+    private Date startTime;
 
     /**
      * 统计项目过滤器 (Statistics Item Filter)

@@ -1,10 +1,11 @@
 package io.github.forget_the_bright.ge.entity.alarm;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 /**
  * 报警查询信息实体 (Alarm Query Info Entity)
@@ -12,8 +13,7 @@ import lombok.ToString;
  * 该实体类用于定义查询报警时所需的参数。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class AlarmQueryInfoEntity {
 
@@ -28,7 +28,7 @@ public class AlarmQueryInfoEntity {
      * 释义: 表示报警被用户或系统确认的时间点。
      */
     @JSONField(name = "AckTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String ackTime;
+    private Date ackTime;
 
     /**
      * 操作员 (Actor)
@@ -101,7 +101,7 @@ public class AlarmQueryInfoEntity {
      * 释义: 表示查询的时间范围结束的时间点。
      */
     @JSONField(name = "EndTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String endTime;
+    private Date endTime;
 
     /**
      * 事件类别 (Event Category)
@@ -198,7 +198,7 @@ public class AlarmQueryInfoEntity {
      * 释义: 表示查询的时间范围开始的时间点。
      */
     @JSONField(name = "StartTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String startTime;
+    private Date startTime;
 
     /**
      * 状态转换时间 (State Transition Time)
@@ -211,7 +211,7 @@ public class AlarmQueryInfoEntity {
      * 释义: 表示报警状态从一个状态转换到另一个状态的时间点。
      */
     @JSONField(name = "StateTransitionTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String stateTransitionTime;
+    private Date stateTransitionTime;
 
     /**
      * 子条件名称 (Sub Condition Name)

@@ -1,10 +1,11 @@
 package io.github.forget_the_bright.ge.entity.tags;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 /**
  * 标签评论实体 (Tag Comment Entity)
@@ -12,8 +13,7 @@ import lombok.ToString;
  * 该实体类用于表示标签的评论信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class TagCommentEntity {
 
@@ -52,5 +52,5 @@ public class TagCommentEntity {
      * 释义: 表示评论创建的时间点。
      */
     @JSONField(name = "timeStamp", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private String timeStamp;
+    private Date timeStamp;
 }

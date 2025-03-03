@@ -1,10 +1,9 @@
 package io.github.forget_the_bright.ge.entity.collectors;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * 数据采集器实体 (Collector Entity)
@@ -12,8 +11,7 @@ import lombok.ToString;
  * 该实体类用于表示数据采集器的相关配置信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class CollectorEntity {
 

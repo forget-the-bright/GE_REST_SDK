@@ -1,12 +1,13 @@
 package io.github.forget_the_bright.ge.constant;
 
+import cn.hutool.http.Method;
 import io.github.forget_the_bright.ge.constant.child.ParamPosition;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmDeleteBackupEntity;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmNotificationInfoEntity;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmQueryInfoEntity;
 import lombok.Getter;
 import lombok.ToString;
-import org.springframework.http.HttpMethod;
+import cn.hutool.http.Method;
 
 /**
  * 告警模块接口枚举 (Alarm API Enum)
@@ -25,7 +26,7 @@ public enum AlarmApiEnum {
     CREATE_BACKUP(
             "创建告警备份",
             "/v1/alarms/backup",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmDeleteBackupEntity.class
@@ -39,7 +40,7 @@ public enum AlarmApiEnum {
     CREATE_ALARM(
             "创建告警",
             "/v1/alarms/create",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmNotificationInfoEntity.class
@@ -53,7 +54,7 @@ public enum AlarmApiEnum {
     DELETE_ALARMS(
             "清除时间段内的告警",
             "/v1/alarms/delete",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmDeleteBackupEntity.class
@@ -67,7 +68,7 @@ public enum AlarmApiEnum {
     QUERY_ALARMS(
             "查询告警和事件数据",
             "/v1/alarms/query",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmQueryInfoEntity.class
@@ -81,7 +82,7 @@ public enum AlarmApiEnum {
     RESTORE_BACKUP(
             "恢复告警备份",
             "/v1/alarms/restore",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class // 恢复备份时传递的是字符串形式的备份文件路径
@@ -90,13 +91,13 @@ public enum AlarmApiEnum {
     // 成员变量
     private final String desc; // 接口描述
     private final String path; // 接口路径
-    private final HttpMethod method; // 请求方法
+    private final Method method; // 请求方法
     private final ParamPosition primaryParamPosition; // 主要参数位置
     private final ParamPosition secondaryParamPosition; // 次要参数位置
     private final Class<?> entityType; // 返回值实体类
 
     // 构造函数
-    AlarmApiEnum(String desc, String path, HttpMethod method,
+    AlarmApiEnum(String desc, String path, Method method,
                  ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
                  Class<?> entityType) {
         this.desc = desc;

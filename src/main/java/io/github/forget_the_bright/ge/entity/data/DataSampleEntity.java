@@ -1,12 +1,11 @@
 package io.github.forget_the_bright.ge.entity.data;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
 
-import java.time.OffsetDateTime;
+import java.util.Date;
 
 /**
  * 数据样本实体 (Data Sample Entity)
@@ -14,8 +13,7 @@ import java.time.OffsetDateTime;
  * 该实体类用于表示数据样本的信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class DataSampleEntity {
 
@@ -42,7 +40,7 @@ public class DataSampleEntity {
      * 释义: 表示数据样本生成的时间点。
      */
     @JSONField(name = "TimeStamp", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private OffsetDateTime timeStamp;
+    private Date timeStamp;
 
     /**
      * 数据值 (Value)

@@ -3,16 +3,51 @@ package io.github.forget_the_bright.ge.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.HashMap;
-import java.util.Map;
-
-// ApiConfig.java
+/**
+ * API 配置信息实体类，用于绑定配置文件中的数据中心相关配置参数
+ *
+ * <p>通过 @ConfigurationProperties 注解绑定以 ge.datacollection 为前缀的配置项，
+ * 支持从 application.yml/properties 等配置文件注入属性值</p>
+ * @author wanghao
+ * @version 1.0
+ * @since 2025-03-03
+ */
 @Data
 @ConfigurationProperties(prefix = "ge.datacollection")
 public class ApiConfig {
-    private String baseUrl;
-    private String clientId;
-    private String clientSecret;
-    private String authType = "bearer";
-    private Map<String, String> endpoints = new HashMap<>();
+    /**
+     * API服务基础地址
+     * <p>默认值指向测试环境地址 https://172.16.176.9</p>
+     */
+    private String baseUrl = "https://172.16.176.9";
+
+    /**
+     * 接口认证用户名
+     * <p>默认值为系统预设测试账号 JXTY-176-9.admin</p>
+     */
+    private String username = "JXTY-176-9.admin";
+
+    /**
+     * 接口认证密码
+     * <p>默认密码为 admin123</p>
+     */
+    private String password = "admin123";
+
+    /**
+     * 客户端身份标识
+     * <p>用于OAuth等认证体系的客户端ID，默认值为 historian_public_rest_api</p>
+     */
+    private String clientId = "historian_public_rest_api";
+
+    /**
+     * 客户端密钥
+     * <p>与客户端ID配套使用的安全凭证，默认值为 publicapisecret</p>
+     */
+    private String clientSecret = "publicapisecret";
+
+    /**
+     * 访问令牌有效期（单位：秒）
+     * <p>默认43199秒（约12小时），控制认证令牌的有效时长</p>
+     */
+    private long tokenExpireSeconds = 43199L;
 }

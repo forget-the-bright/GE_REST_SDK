@@ -1,19 +1,18 @@
 package io.github.forget_the_bright.ge.core;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.http.HttpRequest;
+import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.http.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.config.ApiConfig;
 import io.github.forget_the_bright.ge.constant.child.ApiModule;
 import io.github.forget_the_bright.ge.constant.child.ParamPosition;
 import io.github.forget_the_bright.ge.exception.ApiException;
-import org.springframework.http.HttpMethod;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ import java.util.regex.Pattern;
 @Component
 public class ApiClient {
 
-    private final ApiConfig config;
+    private static ApiConfig config;
 
     @Autowired
     public ApiClient(ApiConfig config) {
@@ -43,18 +42,19 @@ public class ApiClient {
      *
      * @param module  模块枚举
      * @param apiEnum 接口枚举
-     * @param <T>     返回类型
      * @return 响应结果
      */
-    public <T> T execute(ApiModule module, Enum<?> apiEnum, Object body) {
+    public static JSONObject execute(ApiModule module, Enum<?> apiEnum, Object body) {
         return execute(module, apiEnum, null, body);
     }
 
-    public <T> T execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params) {
+    public static JSONObject execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params) {
         return execute(module, apiEnum, params, null);
     }
-
-    public <T> T execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params, Object body) {
+    public static JSONObject execute(ApiModule module, Enum<?> apiEnum) {
+        return execute(module, apiEnum, null, null);
+    }
+    public static JSONObject execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params, Object body) {
         // 1. 构建完整URL
         String fullUrl = buildUrl(module, apiEnum);
 
@@ -62,39 +62,38 @@ public class ApiClient {
         HttpRequest request = createRequest(apiEnum, fullUrl, params, body);
 
         // 3. 添加认证信息
-        addAuthHeader(request);
+        addAuthHeader(request, module);
 
         // 4. 执行请求并处理响应
-        return (T) handleResponse(request.execute());
+        return handleResponse(request);
     }
 
     /**
      * 构建完整URL
      */
-    private String buildUrl(ApiModule module, Enum<?> apiEnum) {
-        String basePath = config.getEndpoints().getOrDefault(module.getCode(), "");
+    private static String buildUrl(ApiModule module, Enum<?> apiEnum) {
+        String contextPath = module.getContextPath();
         String apiPath = getPathFromEnum(apiEnum);
-        return StrUtil.format("{}{}{}", config.getBaseUrl(), basePath, apiPath);
+        return StrUtil.format("{}{}{}", config.getBaseUrl(), contextPath, apiPath);
     }
 
     /**
      * 创建HTTP请求
      */
-    private HttpRequest createRequest(Enum<?> apiEnum, String url, Map<String, Object> params, Object body) {
+    private static HttpRequest createRequest(Enum<?> apiEnum, String url, Map<String, Object> params, Object body) {
         Method method = getMethodFromEnum(apiEnum);
         ParamPosition primaryParamPosition = getPrimaryParamPositionFromEnum(apiEnum);
         ParamPosition secondaryParamPosition = getSecondaryParamPositionFromEnum(apiEnum);
 
         HttpRequest request = new HttpRequest(url)
-                .method(method)
-                .contentType("application/json");
+                .method(method);
 
         fillMessage(request, primaryParamPosition, url, params, body);
         fillMessage(request, secondaryParamPosition, url, params, body);
         return request;
     }
 
-    private void fillMessage(HttpRequest request, ParamPosition paramPosition, String url, Map<String, Object> params, Object body) {
+    private static void fillMessage(HttpRequest request, ParamPosition paramPosition, String url, Map<String, Object> params, Object body) {
         // 根据参数位置处理参数
         switch (paramPosition) {
             case QUERY:
@@ -116,7 +115,6 @@ public class ApiClient {
                 }
                 break;
             case BODY:
-
                 if (ObjectUtil.isEmpty(body)) {
                     throw new ApiException("body参数不能为空");
                 } else if (body instanceof String) {
@@ -173,44 +171,65 @@ public class ApiClient {
     /**
      * 添加认证头
      */
-    private void addAuthHeader(HttpRequest request) {
-        if ("basic".equalsIgnoreCase(config.getAuthType())) {
-            String authHeader = "Basic " + Base64.encode(config.getClientId() + ":" + config.getClientSecret());
-            request.header("Authorization", authHeader);
-        } else if ("bearer".equalsIgnoreCase(config.getAuthType())) {
-            // 这里可以实现Bearer Token的逻辑
-            request.header("Authorization", "Bearer " + getToken());
+    private static void addAuthHeader(HttpRequest request, ApiModule module) {
+        String prefix = module.getAuthType().getType();
+        String subfix = "";
+        switch (module.getAuthType()) {
+            case BASIC: {
+                subfix = Base64.encode(config.getClientId() + ":" + config.getClientSecret());
+                break;
+            }
+            case BEARER: {
+                // 这里可以实现Bearer Token的逻辑
+                subfix = TokenHolder.getValidToken();
+                break;
+            }
+            default:
+                new ApiException("不支持的认证类型:" + module.getAuthType());
+                log.warn("不支持的认证类型: {}", module.getAuthType());
+                break;
         }
+        String authorization = StrUtil.format("{} {}", prefix, subfix);
+        request.header("Authorization", authorization);
     }
 
     /**
-     * 处理响应
+     * 处理HTTP响应
+     * <p>
+     * 此方法主要用于处理HTTP请求的响应结果，包括验证响应状态码和解析响应体
+     * 当接收到未授权状态时，会清除保存的Token
+     * 如果响应状态码不是HTTP_OK，则抛出ApiException异常
+     *
+     * @param request HTTP请求对象
+     * @return 解析后的JSON对象
+     * @throws ApiException 当响应状态码不是HTTP_OK时抛出此异常
      */
-    private JSONObject handleResponse(HttpResponse response) {
+    private static JSONObject handleResponse(HttpRequest request) {
+        HttpResponse response = request.execute();
+        log.debug("API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+        // 检查是否需要重新认证
+        if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
+            TokenHolder.clearToken();
+        }
+        // 检查响应状态码是否为HTTP_OK
         if (response.getStatus() != HttpStatus.HTTP_OK) {
             throw new ApiException("API调用失败: " + response.getStatus() + " - " + response.body());
         }
-
+        // 获取响应体
         String responseBody = response.body();
+        // 记录API响应日志
         log.debug("API响应: {}", responseBody);
-
+        // 解析并返回JSON对象
         return JSONObject.parseObject(responseBody);
-    }
-
-    /**
-     * 获取Token（示例）
-     */
-    private String getToken() {
-        // 这里可以实现Token的获取和刷新逻辑
-        return "your_access_token";
     }
 
     /**
      * 从枚举中获取路径
      */
-    private String getPathFromEnum(Enum<?> apiEnum) {
+    private static String getPathFromEnum(Enum<?> apiEnum) {
         try {
-            return (String) apiEnum.getClass().getMethod("getPath").invoke(apiEnum);
+            java.lang.reflect.Method getPath = ReflectUtil.getMethod(apiEnum.getClass(), "getPath");
+            return Convert.toStr(getPath.invoke(apiEnum));
         } catch (Exception e) {
             throw new ApiException("无法从枚举中获取路径", e);
         }
@@ -219,10 +238,11 @@ public class ApiClient {
     /**
      * 从枚举中获取HTTP方法
      */
-    private Method getMethodFromEnum(Enum<?> apiEnum) {
+    private static Method getMethodFromEnum(Enum<?> apiEnum) {
         try {
-            HttpMethod httpMethod = (HttpMethod) apiEnum.getClass().getMethod("getMethod").invoke(apiEnum);
-            return Method.valueOf(httpMethod.name());
+            java.lang.reflect.Method getMethod = ReflectUtil.getMethod(apiEnum.getClass(), "getMethod");
+            Method httpMethod = (Method) getMethod.invoke(apiEnum);
+            return httpMethod;
         } catch (Exception e) {
             throw new ApiException("无法从枚举中获取HTTP方法", e);
         }
@@ -231,7 +251,7 @@ public class ApiClient {
     /**
      * 从枚举中获取参数位置
      */
-    private ParamPosition getPrimaryParamPositionFromEnum(Enum<?> apiEnum) {
+    private static ParamPosition getPrimaryParamPositionFromEnum(Enum<?> apiEnum) {
         try {
             return (ParamPosition) apiEnum.getClass().getMethod("getPrimaryParamPosition").invoke(apiEnum);
         } catch (Exception e) {
@@ -239,7 +259,7 @@ public class ApiClient {
         }
     }
 
-    private ParamPosition getSecondaryParamPositionFromEnum(Enum<?> apiEnum) {
+    private static ParamPosition getSecondaryParamPositionFromEnum(Enum<?> apiEnum) {
         try {
             return (ParamPosition) apiEnum.getClass().getMethod("getSecondaryParamPosition").invoke(apiEnum);
         } catch (Exception e) {
@@ -250,7 +270,7 @@ public class ApiClient {
     /**
      * 从枚举中获取返回类型
      */
-    private Class<?> getReturnType(Enum<?> apiEnum) {
+    private static Class<?> getReturnType(Enum<?> apiEnum) {
         try {
             String entityType = (String) apiEnum.getClass().getMethod("getEntityType").invoke(apiEnum);
             if (entityType == null) {

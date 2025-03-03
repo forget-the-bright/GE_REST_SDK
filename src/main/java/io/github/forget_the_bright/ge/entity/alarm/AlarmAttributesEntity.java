@@ -2,10 +2,9 @@ package io.github.forget_the_bright.ge.entity.alarm;
 
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * 报警属性实体 (Alarm Attributes Entity)
@@ -13,8 +12,7 @@ import lombok.ToString;
  * 该实体类用于表示报警的属性信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class AlarmAttributesEntity {
 

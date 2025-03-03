@@ -1,10 +1,9 @@
 package io.github.forget_the_bright.ge.entity.systems;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * 历史服务器实体 (Historian Server Entity)
@@ -12,8 +11,7 @@ import lombok.ToString;
  * 该实体类用于表示历史服务器的相关信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class HistorianServerEntity {
 

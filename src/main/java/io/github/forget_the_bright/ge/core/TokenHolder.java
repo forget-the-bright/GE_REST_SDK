@@ -1,35 +1,43 @@
 package io.github.forget_the_bright.ge.core;
 
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.config.ApiConfig;
+import io.github.forget_the_bright.ge.constant.OAuthApiEnum;
+import io.github.forget_the_bright.ge.constant.child.ApiModule;
 import io.github.forget_the_bright.ge.exception.ApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Token 管理类，使用 Hutool 的 TimedCache 实现 Token 缓存和自动刷新
  */
 @Slf4j
+@Component
 public class TokenHolder {
 
     private static final String TOKEN_KEY = "access_token";
     private static final long DEFAULT_EXPIRE_BUFFER = 5000; // 提前 5 秒刷新 Token
 
-    private final ApiConfig config;
-    private final TimedCache<String, String> tokenCache;
+    private static ApiConfig config;
+    private static TimedCache<String, String> tokenCache;
 
+    @Autowired
     public TokenHolder(ApiConfig config) {
         this.config = config;
         // 初始化 TimedCache，设置缓存过期时间为 Token 有效期减去缓冲时间
-        this.tokenCache = new TimedCache<>(TimeUnit.SECONDS.toMillis(config.getTokenExpireSeconds() - DEFAULT_EXPIRE_BUFFER));
+        this.tokenCache = new TimedCache<>(TimeUnit.SECONDS.toMillis(config.getTokenExpireSeconds()) - DEFAULT_EXPIRE_BUFFER);
         // 设置缓存过期监听器，自动刷新 Token
         this.tokenCache.setListener((key, token) -> refreshToken());
     }
@@ -39,7 +47,7 @@ public class TokenHolder {
      *
      * @return 有效的 Token
      */
-    public String getValidToken() {
+    public static String getValidToken() {
         String token = tokenCache.get(TOKEN_KEY, false);
         if (StrUtil.isBlank(token)) {
             token = refreshToken();
@@ -52,23 +60,18 @@ public class TokenHolder {
      *
      * @return 新的 Token
      */
-    private synchronized String refreshToken() {
+    private static synchronized String refreshToken() {
         try {
             // 调用认证接口获取新的 Token
-            String tokenUrl = config.getAuthUrl();
-            HttpRequest request = HttpRequest.post(tokenUrl)
-                    .form("grant_type", "client_credentials")
-                    .form("client_id", config.getClientId())
-                    .form("client_secret", config.getClientSecret());
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("grant_type", "password"); // 模式类型: 密码
+            paramMap.put("username", config.getUsername()); // 账号
+            paramMap.put("password", config.getPassword()); // 密码
 
-            HttpResponse response = request.execute();
-            if (response.getStatus() != HttpStatus.HTTP_OK) {
-                throw new ApiException("获取 Token 失败: " + response.getStatus() + " - " + response.body());
-            }
+            JSONObject tokenResponse = ApiClient.execute(ApiModule.OAUTH, OAuthApiEnum.GET_TOKEN, paramMap);
 
-            JSONObject tokenResponse = JSONUtil.parseObj(response.body());
-            String newToken = tokenResponse.getStr("access_token");
-            long expiresIn = tokenResponse.getLong("expires_in", config.getTokenExpireSeconds());
+            String newToken = tokenResponse.getString("access_token");
+            long expiresIn = ObjectUtil.defaultIfNull(tokenResponse.getLong("expires_in"), config.getTokenExpireSeconds());
 
             // 更新缓存
             tokenCache.put(TOKEN_KEY, newToken, TimeUnit.SECONDS.toMillis(expiresIn) - DEFAULT_EXPIRE_BUFFER);
@@ -80,11 +83,14 @@ public class TokenHolder {
             throw new ApiException("刷新 Token 失败: " + e.getMessage(), e);
         }
     }
-
+    public void setToken(String token){
+        // 更新缓存
+        tokenCache.put(TOKEN_KEY, token, TimeUnit.SECONDS.toMillis(config.getTokenExpireSeconds()) - DEFAULT_EXPIRE_BUFFER);
+    }
     /**
      * 清除 Token 缓存
      */
-    public void clearToken() {
+    public static void clearToken() {
         tokenCache.remove(TOKEN_KEY);
         log.info("Token 缓存已清除");
     }

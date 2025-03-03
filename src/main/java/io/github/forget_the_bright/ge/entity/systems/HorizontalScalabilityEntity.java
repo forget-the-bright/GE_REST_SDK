@@ -1,10 +1,9 @@
 package io.github.forget_the_bright.ge.entity.systems;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * 水平扩展实体 (Horizontal Scalability Entity)
@@ -12,8 +11,7 @@ import lombok.ToString;
  * 该实体类用于表示水平扩展相关的配置信息。
  */
 @Data
-@Builder
-@ToString(callSuper = true)
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 public class HorizontalScalabilityEntity {
 

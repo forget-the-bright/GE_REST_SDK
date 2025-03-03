@@ -3,7 +3,7 @@ import io.github.forget_the_bright.ge.constant.child.ParamPosition;
 import io.github.forget_the_bright.ge.entity.tags.TagCommentEntity;
 import lombok.Getter;
 import lombok.ToString;
-import org.springframework.http.HttpMethod;
+import cn.hutool.http.Method;
 
 /**
  * Tags 模块接口枚举 (Tags API Enum)
@@ -21,7 +21,7 @@ public enum TagsApiEnum {
     QUERY_TAGS_BY_PARAMS(
             "查询标签列表",
             "/v1/tags",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
@@ -34,7 +34,7 @@ public enum TagsApiEnum {
     ADD_TAG_COMMENT(
             "添加标签评论",
             "/v1/tags/addcomment",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             TagCommentEntity.class
@@ -47,7 +47,7 @@ public enum TagsApiEnum {
     ADD_SINGLE_TAG(
             "添加单个标签",
             "/v1/tags/addtag",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
@@ -60,7 +60,7 @@ public enum TagsApiEnum {
     ADD_BATCH_TAGS(
             "批量添加标签",
             "/v1/tags/addtags",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
@@ -72,7 +72,7 @@ public enum TagsApiEnum {
     GET_COMMENTS_BY_QUERY(
             "查询标签评论",
             "/v1/tags/comments",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
@@ -84,7 +84,7 @@ public enum TagsApiEnum {
     GET_COMMENTS_BY_PATH(
             "路径参数查询评论",
             "/v1/tags/comments/{tagNames}/{start}/{end}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -93,10 +93,10 @@ public enum TagsApiEnum {
     /**
      * 检索标签属性（GET方式）
      */
-    GET_TAG_PROPERTIES_GET(
+    GET_TAG_PROPERTIES_PATH(
             "GET方式检索属性",
             "/v1/tags/properties/{tagName}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -105,10 +105,10 @@ public enum TagsApiEnum {
     /**
      * 检索标签属性（POST方式）
      */
-    GET_TAG_PROPERTIES_POST(
+    GET_TAG_PROPERTIES_PATH_BODY(
             "POST方式检索属性",
             "/v1/tags/properties/{tagName}",
-            HttpMethod.POST,
+            Method.POST,
             ParamPosition.PATH,
             ParamPosition.BODY,
             String.class
@@ -120,7 +120,7 @@ public enum TagsApiEnum {
     UPDATE_TAG_PROPERTIES(
             "更新标签属性",
             "/v1/tags/properties/{tagName}",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.PATH,
             ParamPosition.BODY,
             String.class
@@ -133,7 +133,7 @@ public enum TagsApiEnum {
     RENAME_TAG(
             "标签重命名",
             "/v1/tags/tagrename/{oldTagName}/{newTagName}",
-            HttpMethod.PUT,
+            Method.PUT,
             ParamPosition.PATH,
             ParamPosition.QUERY,
             null
@@ -145,7 +145,7 @@ public enum TagsApiEnum {
     QUERY_TAGS_BY_PATH(
             "路径参数查询标签",
             "/v1/tags/{nameMask}/{maxNumber}",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
@@ -158,7 +158,7 @@ public enum TagsApiEnum {
     DELETE_TAG(
             "删除标签",
             "/v1/tags/{tagName}",
-            HttpMethod.DELETE,
+            Method.DELETE,
             ParamPosition.PATH,
             ParamPosition.QUERY,
             null
@@ -171,7 +171,7 @@ public enum TagsApiEnum {
     ADVANCED_TAG_QUERY(
             "高级标签查询",
             "/v1/tagslist",
-            HttpMethod.GET,
+            Method.GET,
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
@@ -179,12 +179,12 @@ public enum TagsApiEnum {
 
     private final String desc;
     private final String path;
-    private final HttpMethod method;
+    private final Method method;
     private final ParamPosition primaryParamPosition;
     private final ParamPosition secondaryParamPosition;
     private final Class<?> entityType;
 
-    TagsApiEnum(String desc, String path, HttpMethod method,
+    TagsApiEnum(String desc, String path, Method method,
                 ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
                 Class<?> entityType) {
         this.desc = desc;
@@ -193,12 +193,5 @@ public enum TagsApiEnum {
         this.primaryParamPosition = primaryParamPosition;
         this.secondaryParamPosition = secondaryParamPosition;
         this.entityType = entityType;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Name: %s, Method: %s, Path: %s, Desc: %s, PrimaryParam: %s, SecondaryParam: %s, EntityType: %s",
-                name(), method, path, desc, primaryParamPosition, secondaryParamPosition,
-                entityType != null ? entityType.getSimpleName() : "null");
     }
 }
