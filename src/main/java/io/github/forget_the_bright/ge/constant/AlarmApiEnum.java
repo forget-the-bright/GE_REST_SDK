@@ -1,13 +1,12 @@
 package io.github.forget_the_bright.ge.constant;
 
 import cn.hutool.http.Method;
-import io.github.forget_the_bright.ge.constant.child.ParamPosition;
+import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmDeleteBackupEntity;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmNotificationInfoEntity;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmQueryInfoEntity;
 import lombok.Getter;
 import lombok.ToString;
-import cn.hutool.http.Method;
 
 /**
  * 告警模块接口枚举 (Alarm API Enum)

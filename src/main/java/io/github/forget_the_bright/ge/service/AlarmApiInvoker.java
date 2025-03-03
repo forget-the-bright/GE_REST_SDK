@@ -2,7 +2,7 @@ package io.github.forget_the_bright.ge.service;
 
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.AlarmApiEnum;
-import io.github.forget_the_bright.ge.constant.child.ApiModule;
+import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.core.ApiClient;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmDeleteBackupEntity;
 import io.github.forget_the_bright.ge.entity.alarm.AlarmNotificationInfoEntity;

@@ -1,4 +1,4 @@
-package io.github.forget_the_bright.ge.constant.child;
+package io.github.forget_the_bright.ge.constant.attach;
 
 public enum ParamPosition {
     QUERY,   // Query 参数

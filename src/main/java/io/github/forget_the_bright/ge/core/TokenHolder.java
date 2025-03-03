@@ -1,16 +1,12 @@
 package io.github.forget_the_bright.ge.core;
 
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.config.ApiConfig;
 import io.github.forget_the_bright.ge.constant.OAuthApiEnum;
-import io.github.forget_the_bright.ge.constant.child.ApiModule;
+import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.exception.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

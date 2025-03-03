@@ -1,6 +1,6 @@
 package io.github.forget_the_bright.ge.constant;
 
-import io.github.forget_the_bright.ge.constant.child.ParamPosition;
+import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
 
 import io.github.forget_the_bright.ge.entity.systems.HistorianServerEntity;
 import io.github.forget_the_bright.ge.entity.systems.HorizontalScalabilityEntity;

@@ -1,6 +1,6 @@
 package io.github.forget_the_bright.ge.constant;
 
-import io.github.forget_the_bright.ge.constant.child.ParamPosition;
+import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
 import io.github.forget_the_bright.ge.entity.tags.TagNamesEntity;
 import io.github.forget_the_bright.ge.entity.data.TagDataCreationEntity;
 import io.github.forget_the_bright.ge.entity.data.SampledEntity;

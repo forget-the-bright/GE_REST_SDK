@@ -1,6 +1,6 @@
 package io.github.forget_the_bright.ge.constant;
 
-import io.github.forget_the_bright.ge.constant.child.ParamPosition;
+import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
 import io.github.forget_the_bright.ge.entity.collectors.CollectorEntity;
 import lombok.Getter;
 import cn.hutool.http.Method;

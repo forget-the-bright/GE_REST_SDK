@@ -1,5 +1,5 @@
 package io.github.forget_the_bright.ge.constant;
-import io.github.forget_the_bright.ge.constant.child.ParamPosition;
+import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
 import io.github.forget_the_bright.ge.entity.tags.TagCommentEntity;
 import lombok.Getter;
 import lombok.ToString;
