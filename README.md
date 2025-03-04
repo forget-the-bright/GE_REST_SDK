@@ -21,6 +21,8 @@
     <version>1.0.0</version>
 </dependency>
 ```
+### Java Doc
+[GE_REST_SDK JavaDoc](https://javadoc.io/doc/io.github.forget-the-bright/GE_REST_SDK)
 
 ## 项目模块及目录结构
 
