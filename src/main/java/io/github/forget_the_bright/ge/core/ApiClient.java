@@ -1,9 +1,9 @@
 package io.github.forget_the_bright.ge.core;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.http.*;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.config.ApiConfig;
@@ -11,7 +11,6 @@ import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
 import io.github.forget_the_bright.ge.exception.ApiException;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +137,10 @@ public class ApiClient {
                 if (ObjectUtil.isEmpty(params)) {
                     throw new ApiException("params参数不能为空");
                 } else if (params instanceof Map) {
-                    request.form(params);
+                    if (CollUtil.isNotEmpty(params)){
+                        String finalUrl = HttpUtil.urlWithForm(url, params, CharsetUtil.CHARSET_UTF_8, true);
+                        request.setUrl(finalUrl);
+                    }
                 } else {
                     throw new ApiException("Query参数必须是Map类型");
                 }
