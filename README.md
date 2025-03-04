@@ -21,6 +21,28 @@
     <version>1.0.0</version>
 </dependency>
 ```
+### springboot 配置
+```yaml
+# GE Proficy Historian工业时序数据库 配置信息
+ge:
+  datacollection:
+    #API服务基础地址
+    base-url: https://XXX.XX.XXX.X
+    #客户端身份标识
+    client-id: XXX_XX
+    #客户端密钥
+    client-secret: XXX_XX
+    #接口认证用户名
+    username: XXX_XX
+    #接口认证密码
+    password: XXX_XX
+    #链接超时时间（毫秒） -1 代表不限制超时
+    connection-timeout: -1
+    #读取超时时间（毫秒） -1 代表不限制超时
+    read-timeout: -1
+    #访问令牌有效期（单位：秒）
+    token-expire-seconds: 43199
+```
 ### Java Doc
 [GE_REST_SDK JavaDoc](https://javadoc.io/doc/io.github.forget-the-bright/GE_REST_SDK)
 
