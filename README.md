@@ -13,6 +13,14 @@
 5. **配置类**：用于配置 API 客户端的相关参数，如认证信息、超时时间等。
 6. **核心类**：包含核心类 `ApiClient`，用于执行 API 请求并处理响应。
 
+### 项目引用
+```pom
+<dependency>
+    <groupId>io.github.forget-the-bright</groupId>
+    <artifactId>GE_REST_SDK</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 ## 项目模块及目录结构
 
