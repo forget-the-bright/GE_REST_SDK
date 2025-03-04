@@ -6,12 +6,13 @@
 
     <groupId>io.github.forget-the-bright</groupId>
     <artifactId>GE_REST_SDK</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.boot.version>2.7.13</spring.boot.version> <!-- 默认值 -->
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <swagger.core.version>1.6.2</swagger.core.version>
@@ -115,6 +116,8 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.59</version>
+            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -138,9 +141,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/forget-the-bright/HaoUtil.git</connection>
-        <developerConnection>scm:git:https://github.com/forget-the-bright/HaoUtil.git</developerConnection>
-        <url>https://github.com/forget-the-bright/HaoUtil.git</url>
+        <connection>scm:git:https://github.com/forget-the-bright/GE_REST_SDK.git</connection>
+        <developerConnection>scm:git:https://github.com/forget-the-bright/GE_REST_SDK.git</developerConnection>
+        <url>https://github.com/forget-the-bright/GE_REST_SDK.git</url>
     </scm>
 
     <distributionManagement>
@@ -226,6 +229,10 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <source>1.8</source>
+                    <encoding>UTF-8</encoding>
+                </configuration>
             </plugin>
 
             <!-- ProGuard混淆插件-->
