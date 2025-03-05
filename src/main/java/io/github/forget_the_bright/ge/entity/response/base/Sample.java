@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.response.base;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.github.forget_the_bright.ge.constant.common.Quality;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +25,8 @@ public class Sample {
     /**
      * 时间戳，表示数据记录的时间。
      */
-    @JSONField(name = "TimeStamp")
+    @JSONField(name = "TimeStamp", format = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date timeStamp;
 
     /**

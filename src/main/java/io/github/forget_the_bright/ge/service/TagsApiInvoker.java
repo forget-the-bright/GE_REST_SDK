@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.TagsApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.core.ApiClient;
+import io.github.forget_the_bright.ge.core.ApiUtil;
 import io.github.forget_the_bright.ge.entity.request.tags.TagCommentEntity;
 import io.github.forget_the_bright.ge.entity.response.TagsResult;
 
@@ -142,8 +143,8 @@ public class TagsApiInvoker {
      */
     public static JSONObject getCommentsByQuery(Date begin, Date end, String tagNames) {
         HashMap<String, Object> params = new HashMap<>();
-        params.put("begin", DateUtil.format(begin, DatePattern.UTC_FORMAT));
-        params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
+        params.put("begin", ApiUtil.isNullExec(begin, () -> DateUtil.format(begin, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("tagNames", tagNames);
         return ApiClient.execute(
                 ApiModule.TAGS,
@@ -162,8 +163,8 @@ public class TagsApiInvoker {
      */
     public static JSONObject getCommentsByPath(Date begin, Date end, String tagNames) {
         HashMap<String, Object> params = new HashMap<>();
-        params.put("begin", DateUtil.format(begin, DatePattern.UTC_FORMAT));
-        params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
+        params.put("begin", ApiUtil.isNullExec(begin, () -> DateUtil.format(begin, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("tagNames", tagNames);
         return ApiClient.execute(
                 ApiModule.TAGS,

@@ -1,9 +1,11 @@
 package io.github.forget_the_bright;
 
+import cn.hutool.core.date.DateTime;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.github.forget_the_bright.ge.config.ApiConfig;
+import io.github.forget_the_bright.ge.constant.common.CalculationMode;
 import io.github.forget_the_bright.ge.constant.common.Quality;
 import io.github.forget_the_bright.ge.core.ApiClient;
 import io.github.forget_the_bright.ge.core.TokenHolder;
@@ -45,7 +47,18 @@ public class Main {
         //TagsResult jsonObject1 = TagsApiInvoker.queryTagsByPath(10, "*");
 
 
-        //DataResult currentValueByPathVariable = DataApiInvoker.getCurrentValueByPathVariable("DL.FCS0202.1TI1031B_PV");
+        DataResult currentValueByPathVariable = DataApiInvoker.getCurrentValueByPathVariable("DL.FCS0202.1TI1031B_PV");
+        DataResult calculatedByRequestParam = DataApiInvoker.getCalculatedByRequestParam(
+                "DL.FCS0202.1TI1031B_PV",
+                1,
+                new DateTime("2025-02-28"),
+                new DateTime("2025-03-05"),
+                CalculationMode.Average,
+                1000l);
+        DataResult interpolatedByPathVariable = DataApiInvoker.getInterpolatedByPathVariable("DL.FCS0202.1TI1031B_PV", new DateTime("2025-02-28"), new DateTime("2025-03-05"), 10, 1000l);
+        System.out.println(JSONObject.toJSONString(currentValueByPathVariable));
+        System.out.println(JSONObject.toJSONString(calculatedByRequestParam));
+        System.out.println(JSONObject.toJSONString(interpolatedByPathVariable));
         DataSampleEntity dataSampleEntity = new DataSampleEntity().setValue("10").setTimeStamp(new Date());//.setQuality(Quality.BAD)
         //String json = "{\"Quality\": 3}"; // 假设的JSON字符串
         //DataSampleEntity item = JSON.parseObject(json, DataSampleEntity.class);

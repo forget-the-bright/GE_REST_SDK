@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.SystemsApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.core.ApiClient;
+import io.github.forget_the_bright.ge.core.ApiUtil;
 import io.github.forget_the_bright.ge.entity.request.systems.HistorianServerEntity;
 import io.github.forget_the_bright.ge.entity.request.systems.HorizontalScalabilityEntity;
 
@@ -318,8 +319,8 @@ public class SystemsApiInvoker {
         params.put("perfTagName", perfTagName);
         params.put("perfTagType", perfTagType);
         params.put("name", name);
-        params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
-        params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
+        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("intervalMs", intervalMs);
 
         return ApiClient.execute(

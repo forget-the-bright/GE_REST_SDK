@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 通用API客户端，提供RESTful API请求的统一处理
@@ -262,7 +263,7 @@ public class ApiClient {
         String responseBody = response.body();
         log.debug("API响应: {}", responseBody);
         Class<?> returnType = getReturnType(apiEnum);
-        if (returnType == null){
+        if (returnType == null) {
             return JSONObject.parseObject(responseBody);
         }
         return JSONObject.parseObject(responseBody, returnType);
