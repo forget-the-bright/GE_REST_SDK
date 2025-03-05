@@ -44,48 +44,64 @@ public class ApiClient {
     }
 
     /**
-     * 执行带请求体的API调用
+     * 执行带请求体的API调用。
      *
-     * @param module  API模块配置
-     * @param apiEnum API接口枚举定义
-     * @param body    请求体对象
-     * @return 解析后的JSON响应
+     * <p>此方法用于执行带有请求体的API调用。请求体可以是JSON对象或其他格式的数据。</p>
+     *
+     * @param <T>     返回类型的泛型参数，表示API调用返回的数据类型。
+     * @param module  API模块配置，定义了API的基础路径和其他配置信息。
+     * @param apiEnum API接口枚举定义，指定了具体的API端点和相关属性。
+     * @param body    请求体对象，包含要发送给API的数据。
+     * @return 解析后的JSON响应，返回类型由API定义决定。
+     * @throws ApiException 如果API调用过程中发生异常。
      */
     public static <T> T execute(ApiModule module, Enum<?> apiEnum, Object body) {
         return execute(module, apiEnum, null, body);
     }
 
     /**
-     * 执行带参数的API调用
+     * 执行带参数的API调用。
      *
-     * @param module  API模块配置
-     * @param apiEnum API接口枚举定义
-     * @param params  请求参数集合
-     * @return 解析后的JSON响应
+     * <p>此方法用于执行带有查询参数或路径参数的API调用。参数通过URL传递。</p>
+     *
+     * @param <T>     返回类型的泛型参数，表示API调用返回的数据类型。
+     * @param module  API模块配置，定义了API的基础路径和其他配置信息。
+     * @param apiEnum API接口枚举定义，指定了具体的API端点和相关属性。
+     * @param params  请求参数集合，包含要传递给API的查询参数或路径参数。
+     * @return 解析后的JSON响应，返回类型由API定义决定。
+     * @throws ApiException 如果API调用过程中发生异常。
      */
     public static <T> T execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params) {
         return execute(module, apiEnum, params, null);
     }
 
     /**
-     * 执行无参数和请求体的API调用
+     * 执行无参数和请求体的API调用。
      *
-     * @param module  API模块配置
-     * @param apiEnum API接口枚举定义
-     * @return 解析后的JSON响应
+     * <p>此方法用于执行不带任何参数或请求体的API调用。</p>
+     *
+     * @param <T>     返回类型的泛型参数，表示API调用返回的数据类型。
+     * @param module  API模块配置，定义了API的基础路径和其他配置信息。
+     * @param apiEnum API接口枚举定义，指定了具体的API端点和相关属性。
+     * @return 解析后的JSON响应，返回类型由API定义决定。
+     * @throws ApiException 如果API调用过程中发生异常。
      */
     public static <T> T execute(ApiModule module, Enum<?> apiEnum) {
         return execute(module, apiEnum, null, null);
     }
 
     /**
-     * 执行API调用
+     * 执行API调用。
      *
-     * @param module  API模块配置
-     * @param apiEnum API接口枚举定义
-     * @param params  请求参数集合
-     * @param body    请求体对象
-     * @return 解析后的JSON响应
+     * <p>此方法是所有API调用的核心入口，支持带参数和请求体的API调用。它负责构建完整的URL、创建HTTP请求、添加认证头以及处理响应。</p>
+     *
+     * @param <T>     返回类型的泛型参数，表示API调用返回的数据类型。
+     * @param module  API模块配置，定义了API的基础路径和其他配置信息。
+     * @param apiEnum API接口枚举定义，指定了具体的API端点和相关属性。
+     * @param params  请求参数集合，包含要传递给API的查询参数或路径参数。可以为null，表示没有查询参数或路径参数。
+     * @param body    请求体对象，包含要发送给API的数据。可以为null，表示没有请求体。
+     * @return 解析后的JSON响应，返回类型由API定义决定。
+     * @throws ApiException 如果API调用过程中发生异常。
      */
     public static <T> T execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params, Object body) {
         String fullUrl = buildUrl(module, apiEnum);
@@ -93,6 +109,7 @@ public class ApiClient {
         addAuthHeader(request, module);
         return (T) handleResponse(request, apiEnum);
     }
+
 
     /**
      * 构建完整URL
@@ -245,29 +262,40 @@ public class ApiClient {
     }
 
     /**
-     * 处理HTTP响应结果
+     * 处理HTTP响应结果。
      *
-     * @param request 已发送的HTTP请求对象
-     * @return 解析后的JSON响应
-     * @throws ApiException HTTP状态码非200时抛出
+     * <p>此方法负责执行HTTP请求并处理响应。它会检查HTTP状态码，记录请求和响应日志，并根据API定义解析返回的数据。</p>
+     *
+     * @param request 已发送的HTTP请求对象。
+     * @param apiEnum API接口枚举定义，用于确定返回数据的类型。
+     * @return 解析后的JSON响应，返回类型由API定义决定。
+     * @throws ApiException 如果HTTP状态码不是200（OK），或在处理响应时发生其他异常。
      */
     private static Object handleResponse(HttpRequest request, Enum<?> apiEnum) {
         HttpResponse response = request.execute();
         log.debug("API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+
+        // 处理未授权的情况，清除令牌以便重新获取
         if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
             TokenHolder.clearToken();
         }
+
+        // 检查HTTP状态码是否为200（OK）
         if (response.getStatus() != HttpStatus.HTTP_OK) {
             throw new ApiException("API调用失败: " + response.getStatus() + " - " + response.body());
         }
+
         String responseBody = response.body();
         log.debug("API响应: {}", responseBody);
+
+        // 获取返回类型并解析响应体
         Class<?> returnType = getReturnType(apiEnum);
         if (returnType == null) {
             return JSONObject.parseObject(responseBody);
         }
         return JSONObject.parseObject(responseBody, returnType);
     }
+
 
     /**
      * 从枚举实例获取接口路径

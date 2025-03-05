@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * 定义过滤模式的枚举类，用于指定过滤条件的模式
  * @author wanghao(helloworlwh @ 163.com)
- * @date 2025/3/5 下午2:59
+ * @since 2025/3/5 下午2:59
  */
 public enum FilterMode {
     /**

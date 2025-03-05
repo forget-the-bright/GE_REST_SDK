@@ -13,7 +13,7 @@ import java.util.List;
  * 该类表示标签查询响应的结果。
  *
  * @author wanghao(helloworlwh@163.com)
- * @date 2025/03/05 16:19
+ * @since 2025/03/05 16:19
  */
 @Data
 @Accessors(chain = true)

@@ -12,7 +12,7 @@ import java.util.List;
  * 包含标签名称、错误代码、数据类型、工程单位、高工程单位、低工程单位和样本列表等信息。
  *
  * @author wanghao(helloworlwh @ 163.com)
- * @date 2025/3/5 下午2:36
+ * @since 2025/3/5 下午2:36
  */
 @Data
 @Accessors(chain = true)

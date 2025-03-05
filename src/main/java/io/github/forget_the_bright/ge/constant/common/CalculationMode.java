@@ -3,12 +3,13 @@ package io.github.forget_the_bright.ge.constant.common;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 枚举类CalculationMode用于定义计算模式
- * 这里可以包括多种计算模式，例如：简单模式、复杂模式、自定义模式等
- * 每种模式可能对应着不同的计算规则或算法
+ * 枚举类 {@code CalculationMode} 用于定义数据计算模式。
+ * <p>
+ * 此枚举包含了多种计算模式，每种模式对应不同的计算规则或算法。这些模式主要用于数据处理和分析场景，
+ * 例如计算平均值、标准差、总和等统计信息。
  *
- * @author wanghao(helloworlwh @ 163.com)
- * @date 2025/3/5 下午2:59
+ * @author wanghao (helloworlwh @ 163.com)
+ * @since 2025-03-05
  */
 public enum CalculationMode {
     /**

@@ -3,9 +3,13 @@ package io.github.forget_the_bright.ge.constant.common;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * @Description TODO
- * @Author wanghao(helloworlwh @ 163.com)
- * @Date 2025/3/5 下午4:01
+ * 枚举类 {@code ReturnDataFields} 用于定义返回数据字段。
+ * <p>
+ * 此枚举指定了在查询中可以返回的数据字段类型。不同的字段类型决定了从 API 查询结果中包含哪些信息，
+ * 例如时间戳、值、质量等。这些字段主要用于数据处理和分析场景，帮助用户根据需求选择所需的数据内容。
+ *
+ * @author wanghao (helloworlwh @ 163.com)
+ * @since 2025-03-05
  */
 public enum ReturnDataFields {
 

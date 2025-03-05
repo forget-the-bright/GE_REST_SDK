@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Data quality enumeration type, representing the quality status of data.
  *
  * @author wanghao(helloworlwh @ 163.com)
- * @date 2025/3/5 下午2:59
+ * @since 2025/3/5 下午2:59
  */
 public enum Quality {
     /**

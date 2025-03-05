@@ -15,7 +15,7 @@ import java.util.List;
  * 包含时间戳、值、质量指标和数据属性列表等信息。
  *
  * @author wanghao(helloworlwh @ 163.com)
- * @date 2025/3/5 下午2:28
+ * @since 2025/3/5 下午2:28
  */
 @Data
 @Accessors(chain = true)

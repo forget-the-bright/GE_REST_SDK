@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Sampling mode enumeration, representing different data sampling methods.
  *
  * @author wanghao(helloworlwh @ 163.com)
- * @date 2025/3/5 下午2:59
+ * @since 2025/3/5 下午2:59
  */
 public enum SamplingMode {
 

@@ -5,7 +5,7 @@ package io.github.forget_the_bright.ge.constant.common;
  * 该类表示方向常量。
  *
  * @author wanghao(helloworlwh@163.com)
- * @date 2025/03/05 14:59
+ * @since 2025/03/05 14:59
  */
 public enum Direction {
     /**

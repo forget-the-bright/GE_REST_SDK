@@ -3,7 +3,7 @@ package io.github.forget_the_bright.ge.constant.attach;
 /**
  * @Description TODO
  * @Author wanghao(helloworlwh @ 163.com)
- * @Date 2025/3/3 下午2:52
+ * @since 2025/3/3 下午2:52
  */
 
 import lombok.ToString;
