@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.CollectorsApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.core.ApiClient;
-import io.github.forget_the_bright.ge.entity.collectors.CollectorEntity;
+import io.github.forget_the_bright.ge.entity.request.collectors.CollectorEntity;
 
 import java.util.HashMap;
 import java.util.Map;

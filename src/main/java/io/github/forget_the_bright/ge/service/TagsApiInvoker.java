@@ -6,7 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.TagsApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.core.ApiClient;
-import io.github.forget_the_bright.ge.entity.tags.TagCommentEntity;
+import io.github.forget_the_bright.ge.entity.request.tags.TagCommentEntity;
+import io.github.forget_the_bright.ge.entity.response.TagsResult;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class TagsApiInvoker {
      * }
      * </pre>
      */
-    public static JSONObject queryTagsByParams(int maxNumber, String nameMask) {
+    public static TagsResult queryTagsByParams(int maxNumber, String nameMask) {
         // 构造API请求参数集
         Map<String, Object> params = new HashMap<>();
         params.put("maxNumber", maxNumber);
@@ -75,7 +76,7 @@ public class TagsApiInvoker {
      * }
      * </pre>
      */
-    public static JSONObject queryTagsByPath(int maxNumber, String nameMask) {
+    public static TagsResult queryTagsByPath(int maxNumber, String nameMask) {
         // 构造API请求参数集
         Map<String, Object> params = new HashMap<>();
         params.put("maxNumber", maxNumber);

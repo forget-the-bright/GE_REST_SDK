@@ -1,4 +1,4 @@
-package io.github.forget_the_bright.ge.entity.alarm;
+package io.github.forget_the_bright.ge.entity.request.alarm;
 
 
 import com.alibaba.fastjson.annotation.JSONField;

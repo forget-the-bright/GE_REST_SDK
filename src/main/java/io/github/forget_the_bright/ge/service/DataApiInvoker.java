@@ -5,11 +5,13 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.DataApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
+import io.github.forget_the_bright.ge.constant.common.*;
 import io.github.forget_the_bright.ge.core.ApiClient;
-import io.github.forget_the_bright.ge.entity.data.SampledEntity;
-import io.github.forget_the_bright.ge.entity.data.TagDataCreationEntity;
-import io.github.forget_the_bright.ge.entity.data.TrendEntity;
-import io.github.forget_the_bright.ge.entity.tags.TagNamesEntity;
+import io.github.forget_the_bright.ge.entity.request.data.SampledEntity;
+import io.github.forget_the_bright.ge.entity.request.data.TagDataCreationEntity;
+import io.github.forget_the_bright.ge.entity.request.data.TrendEntity;
+import io.github.forget_the_bright.ge.entity.request.tags.TagNamesEntity;
+import io.github.forget_the_bright.ge.entity.response.DataResult;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -32,7 +34,7 @@ public class DataApiInvoker {
      * @param intervalMs      时间间隔，用于分段计算的毫秒数
      * @return 返回计算结果的JSON对象
      */
-    public static JSONObject getCalculatedByRequestParam(String tagNames,
+    public static DataResult getCalculatedByRequestParam(String tagNames,
                                                          Integer count,
                                                          Date start,
                                                          Date end,
@@ -109,7 +111,7 @@ public class DataApiInvoker {
      * @param tagNames 标签名称
      * @return 返回当前值数据的JSON对象
      */
-    public static JSONObject getCurrentValueByRequestParam(String tagNames) {
+    public static DataResult getCurrentValueByRequestParam(String tagNames) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
 
@@ -126,7 +128,7 @@ public class DataApiInvoker {
      * @param tagNamesEntity 包含标签名称的实体对象
      * @return 返回当前值数据的JSON对象
      */
-    public static JSONObject getCurrentValuePost(TagNamesEntity tagNamesEntity) {
+    public static DataResult getCurrentValuePost(TagNamesEntity tagNamesEntity) {
         return ApiClient.execute(
                 ApiModule.DATA,
                 DataApiEnum.GET_CURRENT_VALUE_POST,
@@ -140,7 +142,7 @@ public class DataApiInvoker {
      * @param tagNames 标签名称
      * @return 返回当前值数据的JSON对象
      */
-    public static JSONObject getCurrentValueByPathVariable(String tagNames) {
+    public static DataResult getCurrentValueByPathVariable(String tagNames) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
         return ApiClient.execute(
@@ -160,7 +162,7 @@ public class DataApiInvoker {
      * @param intervalMs 时间间隔，用于分段计算的毫秒数
      * @return 返回插值数据的JSON对象
      */
-    public static JSONObject getInterpolatedByRequestParam(String tagNames, Date start, Date end, Integer count, Long intervalMs) {
+    public static DataResult getInterpolatedByRequestParam(String tagNames, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
@@ -185,7 +187,7 @@ public class DataApiInvoker {
      * @param intervalMs     时间间隔，用于分段计算的毫秒数
      * @return 返回插值数据的JSON对象
      */
-    public static JSONObject getInterpolatedByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs) {
+    public static DataResult getInterpolatedByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
         params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
@@ -210,7 +212,7 @@ public class DataApiInvoker {
      * @param intervalMs     时间间隔，用于分段计算的毫秒数
      * @return 返回插值数据的JSON对象
      */
-    public static JSONObject getInterpolatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs) {
+    public static DataResult getInterpolatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
         params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
@@ -235,7 +237,7 @@ public class DataApiInvoker {
      * @param intervalMs 时间间隔，用于分段计算的毫秒数
      * @return 返回插值数据的JSON对象
      */
-    public static JSONObject getInterpolatedByPathVariable(String tagNames, Date start, Date end, Integer count, Long intervalMs) {
+    public static DataResult getInterpolatedByPathVariable(String tagNames, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
@@ -260,7 +262,7 @@ public class DataApiInvoker {
      * @param count     数据记录的数量
      * @return 返回原始数据的JSON对象
      */
-    public static JSONObject getRawDataByRequestParam(String tagNames, Date start, Date end, String direction, Integer count) {
+    public static DataResult getRawDataByRequestParam(String tagNames, Date start, Date end, String direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
@@ -285,7 +287,7 @@ public class DataApiInvoker {
      * @param count          数据记录的数量
      * @return 返回原始数据的JSON对象
      */
-    public static JSONObject getRawDataByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, String direction, Integer count) {
+    public static DataResult getRawDataByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, String direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
         params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
@@ -310,7 +312,7 @@ public class DataApiInvoker {
      * @param count          数据记录的数量
      * @return 返回原始数据的JSON对象
      */
-    public static JSONObject getRawDataByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, String direction, Integer count) {
+    public static DataResult getRawDataByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, String direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
         params.put("end", DateUtil.format(end, DatePattern.UTC_FORMAT));
@@ -335,7 +337,7 @@ public class DataApiInvoker {
      * @param count     数据记录的数量
      * @return 返回原始数据的JSON对象
      */
-    public static JSONObject getRawDataByPathVariable(String tagNames, Date start, Date end, String direction, Integer count) {
+    public static DataResult getRawDataByPathVariable(String tagNames, Date start, Date end, String direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
         params.put("start", DateUtil.format(start, DatePattern.UTC_FORMAT));
@@ -357,21 +359,21 @@ public class DataApiInvoker {
      * 该方法用于根据多种查询条件，获取经过采样的数据集
      * 主要应用于大数据量处理场景，通过采样可以减少数据量，提高处理效率
      *
-     * @param calculationMode 计算模式，用于指定数据处理的方式
-     * @param count           请求数量，表示希望获取的数据点数量
-     * @param direction       方向，用于指定数据查询的方向，如正序或倒序
-     * @param end             结束时间，指定查询时间范围的结束点
+     * @param calculationMode  计算模式，用于指定数据处理的方式 {@link CalculationMode}
+     * @param count            请求数量，表示希望获取的数据点数量
+     * @param direction        方向，用于指定数据查询的方向，如正序或倒序 {@link Direction}
+     * @param end              结束时间，指定查询时间范围的结束点
      * @param filterExpression 过滤表达式，用于指定数据过滤条件
-     * @param filterMode      过滤模式，用于指定过滤表达式的应用方式
-     * @param intervalMs      时间间隔（毫秒），指定数据点之间的时间间隔
-     * @param queryModifier   查询修饰符，用于特殊查询需求的处理
-     * @param returnDataFields 返回数据字段，指定需要返回的数据字段
-     * @param samplingMode    采样模式，用于指定数据采样的方式
-     * @param start           开始时间，指定查询时间范围的起始点
-     * @param tagNames        标签名称，指定查询的标签名称
-     * @return 返回包含采样数据的JSONObject对象
+     * @param filterMode       过滤模式，用于指定过滤表达式的应用方式 {@link FilterMode}
+     * @param intervalMs       时间间隔（毫秒），指定数据点之间的时间间隔
+     * @param queryModifier    查询修饰符，用于特殊查询需求的处理
+     * @param returnDataFields 返回数据字段，指定需要返回的数据字段{@link ReturnDataFields}
+     * @param samplingMode     采样模式，用于指定数据采样的方式 {@link SamplingMode}
+     * @param start            开始时间，指定查询时间范围的起始点
+     * @param tagNames         标签名称，指定查询的标签名称
+     * @return 返回包含采样数据的DataResult对象
      */
-    public static JSONObject getSampledByRequestParam(Integer calculationMode,
+    public static DataResult getSampledByRequestParam(Integer calculationMode,
                                                       Integer count,
                                                       Integer direction,
                                                       Date end,
@@ -414,7 +416,7 @@ public class DataApiInvoker {
      * @param sampledEntity 包含采样数据信息的实体对象
      * @return 返回采样数据的JSON对象
      */
-    public static JSONObject getSampledByRequestParamPost(SampledEntity sampledEntity) {
+    public static DataResult getSampledByRequestParamPost(SampledEntity sampledEntity) {
         return ApiClient.execute(
                 ApiModule.DATA,
                 DataApiEnum.GET_SAMPLED_BY_REQUEST_PARAM_POST,
@@ -425,25 +427,25 @@ public class DataApiInvoker {
 
     /**
      * 根据请求参数获取趋势数据
-     *
+     * <p>
      * 该方法用于构建请求参数并调用API接口获取特定条件下的趋势数据它封装了API调用的细节，
      * 包括参数的构建和API的执行过程
      *
-     * @param calculationMode 计算模式，用于指定数据处理的方式
-     * @param count 请求的数据点数量
-     * @param direction 数据查询的方向，例如向前或向后
-     * @param end 查询结束时间
-     * @param filterExpression 过滤表达式，用于筛选数据
-     * @param filterMode 过滤模式，指定如何应用过滤表达式
-     * @param intervalMs 数据点之间的时间间隔，单位为毫秒
-     * @param queryModifier 查询修饰符，可能影响查询的性能或结果
-     * @param samplingMode 采样模式，指定数据采样方式
-     * @param start 查询开始时间
+     * @param calculationMode      计算模式，用于指定数据处理的方式 {@link CalculationMode}
+     * @param count                请求的数据点数量
+     * @param direction            数据查询的方向，例如向前或向后 {@link Direction}
+     * @param end                  查询结束时间
+     * @param filterExpression     过滤表达式，用于筛选数据
+     * @param filterMode           过滤模式，指定如何应用过滤表达式 {@link FilterMode}
+     * @param intervalMs           数据点之间的时间间隔，单位为毫秒
+     * @param queryModifier        查询修饰符，可能影响查询的性能或结果
+     * @param samplingMode         采样模式，指定数据采样方式 {@link SamplingMode}
+     * @param start                查询开始时间
      * @param statisticsItemFilter 统计项过滤器，用于筛选统计项
-     * @param tagNames 标签名称，用于标识数据
-     * @return 返回包含趋势数据的JSONObject对象
+     * @param tagNames             标签名称，用于标识数据
+     * @return 返回包含趋势数据的DataResult对象
      */
-    public static JSONObject getTrendDataByRequestParam(Integer calculationMode,
+    public static DataResult getTrendDataByRequestParam(Integer calculationMode,
                                                         Integer count,
                                                         Integer direction,
                                                         Date end,
@@ -495,7 +497,7 @@ public class DataApiInvoker {
      * @param trendEntity 包含趋势数据信息的实体对象
      * @return 返回趋势数据的JSON对象
      */
-    public static JSONObject getTrendDataByRequestParamPost(TrendEntity trendEntity) {
+    public static DataResult getTrendDataByRequestParamPost(TrendEntity trendEntity) {
         return ApiClient.execute(
                 ApiModule.DATA,
                 DataApiEnum.GET_TREND_DATA_BY_REQUEST_PARAM_POST,

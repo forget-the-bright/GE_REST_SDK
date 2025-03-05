@@ -1,6 +1,7 @@
-package io.github.forget_the_bright.ge.entity.data;
+package io.github.forget_the_bright.ge.entity.request.data;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.constant.common.Quality;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -27,7 +28,7 @@ public class DataSampleEntity {
      * 释义: 数值类型，具体含义需参考数据质量的枚举定义。
      */
     @JSONField(name = "Quality")
-    private Integer quality;
+    private Quality quality;
 
     /**
      * 时间戳 (Timestamp)

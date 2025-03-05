@@ -1,6 +1,7 @@
-package io.github.forget_the_bright.ge.entity.data;
+package io.github.forget_the_bright.ge.entity.request.data;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.constant.common.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -27,7 +28,7 @@ public class SampledEntity {
      * 释义: 具体含义需参考计算模式的枚举定义。
      */
     @JSONField(name = "calculationMode")
-    private Integer calculationMode;
+    private CalculationMode calculationMode;
 
     /**
      * 每个计算间隔内的存档值计数 (Count)
@@ -51,7 +52,7 @@ public class SampledEntity {
      * 释义: 默认值为向前 (0)。
      */
     @JSONField(name = "direction")
-    private Integer direction;
+    private Direction direction;
 
     /**
      * 查询结束时间 (End Time)
@@ -88,7 +89,7 @@ public class SampledEntity {
      * 释义: 具体含义需参考过滤模式的枚举定义。
      */
     @JSONField(name = "filterMode")
-    private Integer filterMode;
+    private FilterMode filterMode;
 
     /**
      * 时间间隔 (Interval in Milliseconds)
@@ -124,7 +125,7 @@ public class SampledEntity {
      * 释义: 数值类型，具体含义需参考返回字段的枚举定义。
      */
     @JSONField(name = "returnDataFields")
-    private Integer returnDataFields;
+    private ReturnDataFields returnDataFields;
 
     /**
      * 采样模式类型 (Sampling Mode)
@@ -136,7 +137,7 @@ public class SampledEntity {
      * 释义: 具体含义需参考采样模式的枚举定义。
      */
     @JSONField(name = "samplingMode")
-    private Integer samplingMode;
+    private SamplingMode samplingMode;
 
     /**
      * 查询开始时间 (Start Time)

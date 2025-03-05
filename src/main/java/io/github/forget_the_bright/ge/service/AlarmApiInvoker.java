@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.AlarmApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.core.ApiClient;
-import io.github.forget_the_bright.ge.entity.alarm.AlarmDeleteBackupEntity;
-import io.github.forget_the_bright.ge.entity.alarm.AlarmNotificationInfoEntity;
-import io.github.forget_the_bright.ge.entity.alarm.AlarmQueryInfoEntity;
+import io.github.forget_the_bright.ge.entity.request.alarm.AlarmDeleteBackupEntity;
+import io.github.forget_the_bright.ge.entity.request.alarm.AlarmNotificationInfoEntity;
+import io.github.forget_the_bright.ge.entity.request.alarm.AlarmQueryInfoEntity;
 
 /**
  * 报警服务API调用器

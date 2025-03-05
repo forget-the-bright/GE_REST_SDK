@@ -24,7 +24,7 @@ public enum OAuthApiEnum {
             Method.POST,
             ParamPosition.QUERY, // 使用 QUERY 参数传递认证信息
             ParamPosition.NONE,
-            null
+            null,null
     );
 
     // 成员变量
@@ -34,16 +34,19 @@ public enum OAuthApiEnum {
     private final ParamPosition primaryParamPosition; // 主要参数位置
     private final ParamPosition secondaryParamPosition; // 次要参数位置
     private final Class<?> entityType; //body请求体对于的实体类型，没有就是null
+    private final Class<?> resultType; // 返回值实体类
 
     // 构造函数
     OAuthApiEnum(String desc, String path, Method method,
                  ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
-                 Class<?> entityType) {
+                 Class<?> entityType,
+                 Class<?> resultType) {
         this.desc = desc;
         this.path = path;
         this.method = method;
         this.primaryParamPosition = primaryParamPosition;
         this.secondaryParamPosition = secondaryParamPosition;
         this.entityType = entityType;
+        this.resultType = resultType;
     }
 }

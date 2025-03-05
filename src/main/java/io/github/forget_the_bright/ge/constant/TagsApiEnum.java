@@ -1,6 +1,8 @@
 package io.github.forget_the_bright.ge.constant;
+
 import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
-import io.github.forget_the_bright.ge.entity.tags.TagCommentEntity;
+import io.github.forget_the_bright.ge.entity.request.tags.TagCommentEntity;
+import io.github.forget_the_bright.ge.entity.response.TagsResult;
 import lombok.Getter;
 import lombok.ToString;
 import cn.hutool.http.Method;
@@ -25,7 +27,7 @@ public enum TagsApiEnum {
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
-    ),
+            , TagsResult.class),
 
     /**
      * 添加标签评论
@@ -38,7 +40,7 @@ public enum TagsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             TagCommentEntity.class
-    ),
+            , null),
 
     /**
      * 添加单个标签
@@ -51,7 +53,7 @@ public enum TagsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
-    ),
+            , null),
 
     /**
      * 批量添加标签
@@ -64,7 +66,7 @@ public enum TagsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
-    ),
+            , null),
 
     /**
      * 查看标签评论（参数在查询字符串）
@@ -76,7 +78,7 @@ public enum TagsApiEnum {
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
-    ),
+            , null),
 
     /**
      * 查看标签评论（参数在路径）
@@ -88,7 +90,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+            , null),
 
     /**
      * 检索标签属性（GET方式）
@@ -100,7 +102,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+            , null),
 
     /**
      * 检索标签属性（POST方式）
@@ -112,7 +114,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.BODY,
             String.class
-    ),
+            , null),
 
     /**
      * 更新标签属性
@@ -124,7 +126,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.BODY,
             String.class
-    ),
+            , null),
 
     /**
      * 标签重命名
@@ -137,7 +139,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.QUERY,
             null
-    ),
+            , null),
 
     /**
      * 路径参数查询标签列表
@@ -149,7 +151,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+            , TagsResult.class),
 
     /**
      * 删除标签
@@ -162,7 +164,7 @@ public enum TagsApiEnum {
             ParamPosition.PATH,
             ParamPosition.QUERY,
             null
-    ),
+            , null),
 
     /**
      * 高级标签列表查询
@@ -174,7 +176,7 @@ public enum TagsApiEnum {
             Method.GET,
             ParamPosition.QUERY,
             ParamPosition.NONE,
-            null
+            null, null
     );
 
     private final String desc;
@@ -183,15 +185,18 @@ public enum TagsApiEnum {
     private final ParamPosition primaryParamPosition;
     private final ParamPosition secondaryParamPosition;
     private final Class<?> entityType;
+    private final Class<?> resultType; // 返回值实体类
 
     TagsApiEnum(String desc, String path, Method method,
                 ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
-                Class<?> entityType) {
+                Class<?> entityType,
+                Class<?> resultType) {
         this.desc = desc;
         this.path = path;
         this.method = method;
         this.primaryParamPosition = primaryParamPosition;
         this.secondaryParamPosition = secondaryParamPosition;
         this.entityType = entityType;
+        this.resultType = resultType;
     }
 }

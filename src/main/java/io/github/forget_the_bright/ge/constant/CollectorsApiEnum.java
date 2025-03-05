@@ -1,7 +1,7 @@
 package io.github.forget_the_bright.ge.constant;
 
 import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
-import io.github.forget_the_bright.ge.entity.collectors.CollectorEntity;
+import io.github.forget_the_bright.ge.entity.request.collectors.CollectorEntity;
 import lombok.Getter;
 import cn.hutool.http.Method;
 import lombok.ToString;
@@ -27,7 +27,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 删除或移动缓冲区文件
@@ -41,7 +41,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 创建收集器实例
@@ -55,7 +55,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
-    ),
+    ,null),
 
     /**
      * 删除收集器实例
@@ -69,7 +69,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 删除离线收集器实例
@@ -83,7 +83,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 查看收集器详细信息
@@ -97,7 +97,7 @@ public enum CollectorsApiEnum {
             ParamPosition.NONE,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 更新收集器实例
@@ -111,7 +111,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class
-    ),
+    ,null),
 
     /**
      * 更新收集器的服务器节点
@@ -125,7 +125,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 获取收集器实例详细信息
@@ -139,7 +139,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 启用或禁用消息压缩
@@ -153,7 +153,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 查看收集器运行模式
@@ -167,7 +167,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 暂停收集器数据收集
@@ -181,7 +181,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 重建收集器列表
@@ -195,7 +195,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 重新启动收集器
@@ -209,7 +209,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 恢复收集器数据收集
@@ -223,7 +223,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 设置收集器调试模式
@@ -237,7 +237,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 启动收集器
@@ -251,7 +251,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 获取收集器状态
@@ -265,7 +265,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 停止收集器
@@ -279,7 +279,7 @@ public enum CollectorsApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             CollectorEntity.class
-    ),
+    ,null),
 
     /**
      * 获取收集器的版本号
@@ -293,7 +293,7 @@ public enum CollectorsApiEnum {
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 获取收集器的版本号（路径参数）
@@ -307,7 +307,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 获取收集器关联的代理机器列表
@@ -321,7 +321,7 @@ public enum CollectorsApiEnum {
             ParamPosition.NONE,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 获取收集器所在计算机安装组件的详细信息
@@ -335,7 +335,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 获取指定机器上安装的 OPC 警报和事件服务器列表
@@ -349,7 +349,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 查看指定机器上安装的 OPC HDA 服务器列表
@@ -363,7 +363,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 查看指定机器上安装的 OPC 服务器列表
@@ -377,7 +377,7 @@ public enum CollectorsApiEnum {
             ParamPosition.PATH,
             ParamPosition.NONE,
             null
-    ),
+    ,null),
 
     /**
      * 获取离线收集器列表
@@ -390,7 +390,7 @@ public enum CollectorsApiEnum {
             Method.GET,
             ParamPosition.NONE,
             ParamPosition.NONE,
-            null
+            null,null
     );
 
     private final String desc;
@@ -399,15 +399,18 @@ public enum CollectorsApiEnum {
     private final ParamPosition primaryParamPosition;
     private final ParamPosition secondaryParamPosition;
     private final Class<?> entityType;
+    private final Class<?> resultType; // 返回值实体类
 
     CollectorsApiEnum(String desc, String path, Method method,
                       ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
-                      Class<?> entityType) {
+                      Class<?> entityType,
+                      Class<?> resultType) {
         this.desc = desc;
         this.path = path;
         this.method = method;
         this.primaryParamPosition = primaryParamPosition;
         this.secondaryParamPosition = secondaryParamPosition;
         this.entityType = entityType;
+        this.resultType = resultType;
     }
 }

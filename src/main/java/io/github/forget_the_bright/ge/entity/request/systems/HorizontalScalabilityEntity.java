@@ -1,4 +1,4 @@
-package io.github.forget_the_bright.ge.entity.systems;
+package io.github.forget_the_bright.ge.entity.request.systems;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;

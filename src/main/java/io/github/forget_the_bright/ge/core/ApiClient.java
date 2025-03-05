@@ -6,6 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.*;
 import cn.hutool.http.*;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.github.forget_the_bright.ge.config.ApiConfig;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
@@ -33,6 +34,7 @@ public class ApiClient {
 
     /**
      * 构造API客户端实例
+     *
      * @param config API配置信息，包含基础URL、客户端凭证等
      */
     @Autowired
@@ -42,54 +44,59 @@ public class ApiClient {
 
     /**
      * 执行带请求体的API调用
-     * @param module API模块配置
+     *
+     * @param module  API模块配置
      * @param apiEnum API接口枚举定义
-     * @param body 请求体对象
+     * @param body    请求体对象
      * @return 解析后的JSON响应
      */
-    public static JSONObject execute(ApiModule module, Enum<?> apiEnum, Object body) {
+    public static <T> T execute(ApiModule module, Enum<?> apiEnum, Object body) {
         return execute(module, apiEnum, null, body);
     }
 
     /**
      * 执行带参数的API调用
-     * @param module API模块配置
+     *
+     * @param module  API模块配置
      * @param apiEnum API接口枚举定义
-     * @param params 请求参数集合
+     * @param params  请求参数集合
      * @return 解析后的JSON响应
      */
-    public static JSONObject execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params) {
+    public static <T> T execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params) {
         return execute(module, apiEnum, params, null);
     }
 
     /**
      * 执行无参数和请求体的API调用
-     * @param module API模块配置
+     *
+     * @param module  API模块配置
      * @param apiEnum API接口枚举定义
      * @return 解析后的JSON响应
      */
-    public static JSONObject execute(ApiModule module, Enum<?> apiEnum) {
+    public static <T> T execute(ApiModule module, Enum<?> apiEnum) {
         return execute(module, apiEnum, null, null);
     }
 
     /**
      * 执行API调用
-     * @param module API模块配置
+     *
+     * @param module  API模块配置
      * @param apiEnum API接口枚举定义
-     * @param params 请求参数集合
-     * @param body 请求体对象
+     * @param params  请求参数集合
+     * @param body    请求体对象
      * @return 解析后的JSON响应
      */
-    public static JSONObject execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params, Object body) {
+    public static <T> T execute(ApiModule module, Enum<?> apiEnum, Map<String, Object> params, Object body) {
         String fullUrl = buildUrl(module, apiEnum);
         HttpRequest request = createRequest(apiEnum, fullUrl, params, body);
         addAuthHeader(request, module);
-        return handleResponse(request);
+        return (T) handleResponse(request, apiEnum);
     }
 
     /**
      * 构建完整URL
-     * @param module API模块配置
+     *
+     * @param module  API模块配置
      * @param apiEnum API接口枚举定义
      * @return 完整请求URL
      */
@@ -101,10 +108,11 @@ public class ApiClient {
 
     /**
      * 创建HTTP请求对象
+     *
      * @param apiEnum API接口枚举定义
-     * @param url 完整请求URL
-     * @param params 请求参数集合
-     * @param body 请求体对象
+     * @param url     完整请求URL
+     * @param params  请求参数集合
+     * @param body    请求体对象
      * @return 配置完成的HttpRequest对象
      */
     private static HttpRequest createRequest(Enum<?> apiEnum, String url, Map<String, Object> params, Object body) {
@@ -124,11 +132,12 @@ public class ApiClient {
 
     /**
      * 填充请求参数到指定位置
-     * @param request HTTP请求对象
+     *
+     * @param request       HTTP请求对象
      * @param paramPosition 参数位置枚举
-     * @param url 当前请求URL（用于路径参数替换）
-     * @param params 请求参数集合
-     * @param body 请求体对象
+     * @param url           当前请求URL（用于路径参数替换）
+     * @param params        请求参数集合
+     * @param body          请求体对象
      * @throws ApiException 参数不符合要求时抛出
      */
     private static void fillMessage(HttpRequest request, ParamPosition paramPosition, String url, Map<String, Object> params, Object body) {
@@ -137,7 +146,7 @@ public class ApiClient {
                 if (ObjectUtil.isEmpty(params)) {
                     throw new ApiException("params参数不能为空");
                 } else if (params instanceof Map) {
-                    if (CollUtil.isNotEmpty(params)){
+                    if (CollUtil.isNotEmpty(params)) {
                         String finalUrl = HttpUtil.urlWithForm(url, params, CharsetUtil.CHARSET_UTF_8, true);
                         request.setUrl(finalUrl);
                     }
@@ -160,7 +169,7 @@ public class ApiClient {
                 } else if (body instanceof String) {
                     request.body((String) body);
                 } else {
-                    request.body(JSONObject.toJSONString(body));
+                    request.body(JSONObject.toJSONString(body, SerializerFeature.WriteEnumUsingToString));
                 }
                 break;
             case FORM:
@@ -183,7 +192,8 @@ public class ApiClient {
 
     /**
      * 替换URL中的路径参数
-     * @param url 原始URL
+     *
+     * @param url    原始URL
      * @param params 路径参数Map
      * @return 替换后的URL
      * @throws ApiException 缺少路径参数时抛出
@@ -210,8 +220,9 @@ public class ApiClient {
 
     /**
      * 添加认证头
+     *
      * @param request HTTP请求对象
-     * @param module API模块配置
+     * @param module  API模块配置
      * @throws ApiException 不支持的认证类型时抛出
      */
     private static void addAuthHeader(HttpRequest request, ApiModule module) {
@@ -234,11 +245,12 @@ public class ApiClient {
 
     /**
      * 处理HTTP响应结果
+     *
      * @param request 已发送的HTTP请求对象
      * @return 解析后的JSON响应
      * @throws ApiException HTTP状态码非200时抛出
      */
-    private static JSONObject handleResponse(HttpRequest request) {
+    private static Object handleResponse(HttpRequest request, Enum<?> apiEnum) {
         HttpResponse response = request.execute();
         log.debug("API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
         if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
@@ -249,11 +261,16 @@ public class ApiClient {
         }
         String responseBody = response.body();
         log.debug("API响应: {}", responseBody);
-        return JSONObject.parseObject(responseBody);
+        Class<?> returnType = getReturnType(apiEnum);
+        if (returnType == null){
+            return JSONObject.parseObject(responseBody);
+        }
+        return JSONObject.parseObject(responseBody, returnType);
     }
 
     /**
      * 从枚举实例获取接口路径
+     *
      * @param apiEnum API接口枚举定义
      * @return 接口路径字符串
      * @throws ApiException 反射获取路径失败时抛出
@@ -269,6 +286,7 @@ public class ApiClient {
 
     /**
      * 从枚举实例获取HTTP方法
+     *
      * @param apiEnum API接口枚举定义
      * @return HTTP方法枚举
      * @throws ApiException 反射获取方法失败时抛出
@@ -284,6 +302,7 @@ public class ApiClient {
 
     /**
      * 从枚举实例获取主参数位置
+     *
      * @param apiEnum API接口枚举定义
      * @return 主参数位置枚举
      * @throws ApiException 反射获取参数位置失败时抛出
@@ -298,6 +317,7 @@ public class ApiClient {
 
     /**
      * 从枚举实例获取次参数位置
+     *
      * @param apiEnum API接口枚举定义
      * @return 次参数位置枚举
      * @throws ApiException 反射获取参数位置失败时抛出
@@ -312,17 +332,15 @@ public class ApiClient {
 
     /**
      * 从枚举实例获取返回类型
+     *
      * @param apiEnum API接口枚举定义
      * @return 返回类型Class对象
      * @throws ApiException 反射获取返回类型失败时抛出
      */
     private static Class<?> getReturnType(Enum<?> apiEnum) {
         try {
-            String entityType = (String) apiEnum.getClass().getMethod("getEntityType").invoke(apiEnum);
-            if (entityType == null) {
-                return JSONObject.class;
-            }
-            return Class.forName("com.ge.datacollection.model." + entityType);
+            Class<?> entityType = (Class<?>) apiEnum.getClass().getMethod("getResultType").invoke(apiEnum);
+            return entityType;
         } catch (Exception e) {
             throw new ApiException("无法从枚举中获取返回类型", e);
         }

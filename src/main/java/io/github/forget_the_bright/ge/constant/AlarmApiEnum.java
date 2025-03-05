@@ -2,9 +2,9 @@ package io.github.forget_the_bright.ge.constant;
 
 import cn.hutool.http.Method;
 import io.github.forget_the_bright.ge.constant.attach.ParamPosition;
-import io.github.forget_the_bright.ge.entity.alarm.AlarmDeleteBackupEntity;
-import io.github.forget_the_bright.ge.entity.alarm.AlarmNotificationInfoEntity;
-import io.github.forget_the_bright.ge.entity.alarm.AlarmQueryInfoEntity;
+import io.github.forget_the_bright.ge.entity.request.alarm.AlarmDeleteBackupEntity;
+import io.github.forget_the_bright.ge.entity.request.alarm.AlarmNotificationInfoEntity;
+import io.github.forget_the_bright.ge.entity.request.alarm.AlarmQueryInfoEntity;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -29,7 +29,7 @@ public enum AlarmApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmDeleteBackupEntity.class
-    ),
+            , null),
 
     /**
      * 添加告警接口
@@ -43,7 +43,7 @@ public enum AlarmApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmNotificationInfoEntity.class
-    ),
+            , null),
 
     /**
      * 清除时间段内的告警接口
@@ -57,7 +57,7 @@ public enum AlarmApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmDeleteBackupEntity.class
-    ),
+            , null),
 
     /**
      * 查询告警和事件数据接口
@@ -71,7 +71,7 @@ public enum AlarmApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             AlarmQueryInfoEntity.class
-    ),
+            , null),
 
     /**
      * 恢复告警备份接口
@@ -85,7 +85,7 @@ public enum AlarmApiEnum {
             ParamPosition.BODY,
             ParamPosition.NONE,
             String.class // 恢复备份时传递的是字符串形式的备份文件路径
-    );
+            , null);
 
     // 成员变量
     private final String desc; // 接口描述
@@ -93,18 +93,21 @@ public enum AlarmApiEnum {
     private final Method method; // 请求方法
     private final ParamPosition primaryParamPosition; // 主要参数位置
     private final ParamPosition secondaryParamPosition; // 次要参数位置
-    private final Class<?> entityType; // 返回值实体类
+    private final Class<?> entityType; // 请求体实体类
+    private final Class<?> resultType; // 返回值实体类
 
     // 构造函数
     AlarmApiEnum(String desc, String path, Method method,
                  ParamPosition primaryParamPosition, ParamPosition secondaryParamPosition,
-                 Class<?> entityType) {
+                 Class<?> entityType,
+                 Class<?> resultType) {
         this.desc = desc;
         this.path = path;
         this.method = method;
         this.primaryParamPosition = primaryParamPosition;
         this.secondaryParamPosition = secondaryParamPosition;
         this.entityType = entityType;
+        this.resultType = resultType;
     }
 
 }
