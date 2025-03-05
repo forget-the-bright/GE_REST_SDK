@@ -18,7 +18,7 @@
 <dependency>
     <groupId>io.github.forget-the-bright</groupId>
     <artifactId>GE_REST_SDK</artifactId>
-    <version>1.0.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 ### springboot 配置
@@ -71,29 +71,41 @@ GE_REST_SDK\
 │   │   │   └── io\github\forget_the_bright\ge\
 │   │   │       ├── constant\
 │   │   │       │   ├── ApiModule.java
+│   │   │       │   ├── CalculationMode.java
 │   │   │       │   ├── CollectorsApiEnum.java
 │   │   │       │   ├── DataApiEnum.java
+│   │   │       │   ├── Direction.java
+│   │   │       │   ├── FilterMode.java
+│   │   │       │   ├── OAuthApiEnum.java
+│   │   │       │   ├── Quality.java
+│   │   │       │   ├── ReturnDataFields.java
+│   │   │       │   ├── SamplingMode.java
 │   │   │       │   ├── SystemsApiEnum.java
 │   │   │       │   └── TagsApiEnum.java
 │   │   │       ├── config\
 │   │   │       │   └── ApiConfig.java
 │   │   │       ├── core\
-│   │   │       │   └── ApiClient.java
+│   │   │       │   ├── ApiClient.java
+│   │   │       │   └── ApiUtil.java
 │   │   │       ├── entity\
-│   │   │       │   ├── alarm\
-│   │   │       │   │   ├── AlarmDeleteBackupEntity.java
-│   │   │       │   │   └── AlarmNotificationInfoEntity.java
-│   │   │       │   ├── collectors\
-│   │   │       │   │   └── CollectorEntity.java
-│   │   │       │   ├── data\
-│   │   │       │   │   ├── SampledEntity.java
-│   │   │       │   │   ├── TagDataCreationEntity.java
-│   │   │       │   │   └── TrendEntity.java
-│   │   │       │   ├── systems\
-│   │   │       │   │   ├── HistorianServerEntity.java
-│   │   │       │   │   └── HorizontalScalabilityEntity.java
-│   │   │       │   └── tags\
-│   │   │       │       └── TagCommentEntity.java
+│   │   │       │   ├── request\
+│   │   │       │   │   ├── alarm\
+│   │   │       │   │   │   ├── AlarmDeleteBackupEntity.java
+│   │   │       │   │   │   ├── AlarmNotificationInfoEntity.java
+│   │   │       │   │   │   └── AlarmQueryInfoEntity.java
+│   │   │       │   │   ├── collectors\
+│   │   │       │   │   │   └── CollectorEntity.java
+│   │   │       │   │   ├── data\
+│   │   │       │   │   │   ├── SampledEntity.java
+│   │   │       │   │   │   ├── TagDataCreationEntity.java
+│   │   │       │   │   │   └── TrendEntity.java
+│   │   │       │   │   ├── systems\
+│   │   │       │   │   │   ├── HistorianServerEntity.java
+│   │   │       │   │   │   └── HorizontalScalabilityEntity.java
+│   │   │       │   │   └── tags\
+│   │   │       │   │       └── TagCommentEntity.java
+│   │   │       │   └── response\
+│   │   │       │       └── BaseResult.java
 │   │   │       ├── exception\
 │   │   │       │   └── ApiException.java
 │   │   │       ├── service\
@@ -113,6 +125,7 @@ GE_REST_SDK\
 │                   └── ApiClientTest.java
 ├── README.md
 └── pom.xml
+
 ```
 
 ## 各个方法类的功能
@@ -178,7 +191,10 @@ GE_REST_SDK\
 ### `DataApiInvoker.java`
 - **功能**：数据服务 API 调用器，提供数据服务的相关操作接口。
 - **方法**：
-  - `getCalculatedByRequestParam(String tagNames, Integer count, Date start, Date end, String calculationMode, Long intervalMs)`：根据请求参数获取计算结果。
+  - `getCalculatedByRequestParam(String tagNames, Integer count, Date start, Date end, CalculationMode calculationMode, Long intervalMs)`：根据请求参数获取计算结果。
+  - `getCalculatedByRequestParamPost(TagNamesEntity tagNamesEntity, Integer count, Date start, Date end, CalculationMode calculationMode, Long intervalMs)`：通过请求参数和请求体获取计算数据。
+  - `getCalculatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, CalculationMode calculationMode, Integer count, Long intervalMs)`：通过路径变量和请求体获取计算数据。
+  - `getCalculatedByPathVariable(String tagNames, Date start, Date end, CalculationMode calculationMode, Integer count, Long intervalMs)`：通过路径变量获取计算数据。
   - `configureQueryResultByRequestParam(Integer maxDataQueryResultSize)`：根据请求参数配置查询结果。
   - `configureQueryResultByPathVariable(Integer maxDataQueryResultSize)`：根据路径变量配置查询结果。
   - `createTagData(TagDataCreationEntity tagDataCreationEntity)`：创建数据点位标签数据。
@@ -189,14 +205,15 @@ GE_REST_SDK\
   - `getInterpolatedByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs)`：查询标签列表的插值。
   - `getInterpolatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs)`：查询标签列表的插值。
   - `getInterpolatedByPathVariable(String tagNames, Date start, Date end, Integer count, Long intervalMs)`：根据路径变量查询标签列表的插值。
-  - `getRawDataByRequestParam(String tagNames, Date start, Date end, String direction, Integer count)`：根据请求参数查询原始数据。
-  - `getRawDataByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, String direction, Integer count)`：查询原始数据。
-  - `getRawDataByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, String direction, Integer count)`：查询原始数据。
-  - `getRawDataByPathVariable(String tagNames, Date start, Date end, String direction, Integer count)`：根据路径变量查询原始数据。
-  - `getSampledByRequestParam(Integer calculationMode, Integer count, Integer direction, Date end, String filterExpression, Integer filterMode, Long intervalMs, Long queryModifier, Integer returnDataFields, Integer samplingMode, Date start, String tagNames)`：根据请求参数获取采样数据。
+  - `getRawDataByRequestParam(String tagNames, Date start, Date end, Direction direction, Integer count)`：根据请求参数查询原始数据。
+  - `getRawDataByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Direction direction, Integer count)`：查询原始数据。
+  - `getRawDataByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Direction direction, Integer count)`：查询原始数据。
+  - `getRawDataByPathVariable(String tagNames, Date start, Date end, Direction direction, Integer count)`：根据路径变量查询原始数据。
+  - `getSampledByRequestParam(CalculationMode calculationMode, Integer count, Direction direction, Date end, String filterExpression, FilterMode filterMode, Long intervalMs, Long queryModifier, ReturnDataFields returnDataFields, SamplingMode samplingMode, Date start, String tagNames)`：根据请求参数获取采样数据。
   - `getSampledByRequestParamPost(SampledEntity sampledEntity)`：查询采样数据。
-  - `getTrendDataByRequestParam(Integer calculationMode, Integer count, Integer direction, Date end, String filterExpression, Integer filterMode, Long intervalMs, Long queryModifier, Integer samplingMode, Date start, String statisticsItemFilter, String tagNames)`：根据请求参数获取趋势数据。
+  - `getTrendDataByRequestParam(CalculationMode calculationMode, Integer count, Direction direction, Date end, String filterExpression, FilterMode filterMode, Long intervalMs, Long queryModifier, SamplingMode samplingMode, Date start, String statisticsItemFilter, String tagNames)`：根据请求参数获取趋势数据。
   - `getTrendDataByRequestParamPost(TrendEntity trendEntity)`：查询趋势数据。
+
 
 ### `SystemsApiInvoker.java`
 - **功能**：系统服务 API 调用器，提供系统服务的相关操作接口。
