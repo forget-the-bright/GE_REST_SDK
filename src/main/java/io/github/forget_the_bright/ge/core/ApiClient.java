@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -165,8 +166,8 @@ public class ApiClient {
                     throw new ApiException("params参数不能为空");
                 } else if (params instanceof Map) {
                     if (CollUtil.isNotEmpty(params)) {
-                        String finalUrl = HttpUtil.urlWithForm(url, params, CharsetUtil.CHARSET_UTF_8, true);
-                        request.setUrl(finalUrl);
+                        String encodedUrl = buildUrlParams(url, params);
+                        request.setUrl(encodedUrl);
                     }
                 } else {
                     throw new ApiException("Query参数必须是Map类型");
@@ -204,6 +205,20 @@ public class ApiClient {
             default:
                 throw new ApiException("不支持的参数位置类型: " + paramPosition);
         }
+    }
+
+
+    public static String buildUrlParams(String url, Map<String, Object> params) {
+        StringBuilder urlParams = new StringBuilder();
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            if (urlParams.length() > 0) {
+                urlParams.append("&");
+            }
+            urlParams.append(entry.getKey())
+                    .append("=")
+                    .append(Optional.ofNullable(entry.getValue()).orElse("").toString());
+        }
+        return url + "?" + urlParams.toString();
     }
 
     private static final Pattern PATH_PARAM_PATTERN = Pattern.compile("\\{(.*?)\\}");

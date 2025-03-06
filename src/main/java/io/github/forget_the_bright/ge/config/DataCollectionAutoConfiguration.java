@@ -7,6 +7,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 /**
  * 自动配置类，用于在Spring容器中自动注册API客户端和令牌持有者相关的Bean。
@@ -31,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(ApiConfig.class)
 @ConditionalOnClass(ApiClient.class)
-public class DataCollectionAutoConfiguration {
+public class DataCollectionAutoConfiguration implements WebMvcConfigurer {
 
     /**
      * 创建并注册API客户端的Bean实例。
@@ -63,5 +67,11 @@ public class DataCollectionAutoConfiguration {
     @ConditionalOnMissingBean
     public TokenHolder tokenHolder(ApiConfig config) {
         return new TokenHolder(config);
+    }
+
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(new EnumParamArgumentResolver());
     }
 }
