@@ -35,7 +35,7 @@ import java.util.List;
 @Configuration
 @EnableConfigurationProperties(ApiConfig.class)
 @ConditionalOnClass(ApiClient.class)
-public class DataCollectionAutoConfiguration implements WebMvcConfigurer {
+public class DataCollectionAutoConfiguration {
 
     /**
      * 创建并注册API客户端的Bean实例。
@@ -70,8 +70,8 @@ public class DataCollectionAutoConfiguration implements WebMvcConfigurer {
     }
 
 
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new EnumParamArgumentResolver());
+    @Bean
+    public ResolverBeanPostProcessor resolverBeanPostProcessor() {
+        return new ResolverBeanPostProcessor();
     }
 }
