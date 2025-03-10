@@ -18,7 +18,7 @@
 <dependency>
     <groupId>io.github.forget-the-bright</groupId>
     <artifactId>GE_REST_SDK</artifactId>
-    <version>1.0.2.1</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 ### springboot 配置
@@ -42,6 +42,8 @@ ge:
     read-timeout: -1
     #访问令牌有效期（单位：秒）
     token-expire-seconds: 43199
+    #缓存模式(Local,Redis) 默认Local,Redis 需要引入springboot-redis-stater
+    cacheModel: Local
 ```
 ### Java Doc
 [GE_REST_SDK JavaDoc](https://javadoc.io/doc/io.github.forget-the-bright/GE_REST_SDK)

@@ -1,5 +1,6 @@
 package io.github.forget_the_bright.ge.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -13,6 +14,7 @@ import java.util.List;
  * 对特定的 Bean（如 RequestMappingHandlerAdapter）进行后处理。
  * 主要功能是为 {@code RequestMappingHandlerAdapter} 添加自定义的参数解析器。
  */
+@Slf4j
 public class ResolverBeanPostProcessor implements BeanPostProcessor {
 
     /**
@@ -27,7 +29,8 @@ public class ResolverBeanPostProcessor implements BeanPostProcessor {
      */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("-------------------------------" + beanName);
+        log.debug("-------------------------------" + beanName);
+       // System.out.println("-------------------------------" + beanName);
         if (beanName.equals("requestMappingHandlerAdapter")) {
             // 对 requestMappingHandlerAdapter 进行修改
             RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;

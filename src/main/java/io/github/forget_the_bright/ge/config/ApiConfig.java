@@ -64,4 +64,11 @@ public class ApiConfig {
      * 此字段用于设置在建立连接时等待的时间如果超过这个时间未能建立连接，则认为连接超时
      */
     private int connectionTimeout = -1;
+
+    /**
+     * 缓存模式
+     * <p>默认值为 Local，表示使用本地缓存模式</p>
+     * <p>其他值为 Redis，表示使用Redis缓存模式</p>
+     */
+    private String cacheModel = "Local";
 }
