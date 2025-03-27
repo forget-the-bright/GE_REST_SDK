@@ -89,6 +89,19 @@ public class ApiUtil {
      * @return 返回一个映射，其中键是标签名，值是数据项的第一个样本值
      */
     public static Map<String, Object> convertOneDataByTagNames(List<DataItem> data) {
+        return convertOneDataByTagNames(data, "0");
+    }
+
+    /**
+     * 根据标签名称转换单个数据项到一个映射中
+     * 此方法用于处理一组数据项，每个数据项包含多个标签和对应的值通过指定的标签名称，
+     * 方法将每个数据项中的标签值与数据项关联起来，如果标签不存在，则使用默认值
+     *
+     * @param data         包含多个DataItem对象的列表，每个DataItem对象包含一组标签和值
+     * @param defaultValue 如果指定的标签在数据项中不存在时，使用的默认值
+     * @return 返回一个映射，其中键是数据项中的标签值（如果存在），值是数据项本身
+     */
+    public static Map<String, Object> convertOneDataByTagNames(List<DataItem> data, String defaultValue) {
         // 使用Java 8 Stream API根据标签名收集数据项，对于每个标签名，提取其样本列表的第一个值
         Map<String, Object> collect = data.stream().collect(Collectors.toMap(DataItem::getTagName, dataItem -> {
             // 处理样本列表可能为空的情况，如果为空或null，则使用空列表或默认值避免空指针异常
@@ -96,7 +109,7 @@ public class ApiUtil {
                     .orElse(ListUtil.empty())
                     .stream()
                     .findFirst()
-                    .orElse(new Sample().setValue("0"))
+                    .orElse(new Sample().setValue(defaultValue))
                     .getValue();
             return value;
         }));
