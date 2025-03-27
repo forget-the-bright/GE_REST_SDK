@@ -1,8 +1,10 @@
 package io.github.forget_the_bright.ge.service;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.DataApiEnum;
 import io.github.forget_the_bright.ge.constant.attach.ApiModule;
@@ -15,9 +17,9 @@ import io.github.forget_the_bright.ge.entity.request.data.TrendEntity;
 import io.github.forget_the_bright.ge.entity.request.tags.TagNamesEntity;
 import io.github.forget_the_bright.ge.entity.response.DataResult;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataApiInvoker {
 
@@ -47,8 +49,8 @@ public class DataApiInvoker {
         params.put("tagNames", tagNames);
         params.put("count", count);
         // 格式化日期参数，确保时间格式符合API要求
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("calculationMode", calculationMode);
         params.put("intervalMs", intervalMs);
 
@@ -80,8 +82,8 @@ public class DataApiInvoker {
         Map<String, Object> params = new HashMap<>();
         params.put("count", count);
         // 格式化日期参数，确保时间格式符合API要求
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("calculationMode", calculationMode);
         params.put("intervalMs", intervalMs);
         return ApiClient.execute(
@@ -105,8 +107,8 @@ public class DataApiInvoker {
      */
     public static DataResult getCalculatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, CalculationMode calculationMode, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("calculationMode", calculationMode);
         params.put("count", count);
         params.put("intervalMs", intervalMs);
@@ -133,8 +135,8 @@ public class DataApiInvoker {
     public static DataResult getCalculatedByPathVariable(String tagNames, Date start, Date end, CalculationMode calculationMode, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("calculationMode", calculationMode);
         params.put("count", count);
         params.put("intervalMs", intervalMs);
@@ -253,8 +255,8 @@ public class DataApiInvoker {
     public static DataResult getInterpolatedByRequestParam(String tagNames, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("count", count);
         params.put("intervalMs", intervalMs);
 
@@ -277,8 +279,8 @@ public class DataApiInvoker {
      */
     public static DataResult getInterpolatedByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("count", count);
         params.put("intervalMs", intervalMs);
 
@@ -302,8 +304,8 @@ public class DataApiInvoker {
      */
     public static DataResult getInterpolatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("count", count);
         params.put("intervalMs", intervalMs);
 
@@ -328,8 +330,8 @@ public class DataApiInvoker {
     public static DataResult getInterpolatedByPathVariable(String tagNames, Date start, Date end, Integer count, Long intervalMs) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("count", count);
         params.put("intervalMs", intervalMs);
 
@@ -338,6 +340,66 @@ public class DataApiInvoker {
                 DataApiEnum.GET_INTERPOLATED_BY_PATH_VARIABLE,
                 params
         );
+    }
+
+    /**
+     * 根据总和标签获取区间值
+     * 该方法用于计算指定标签在给定时间区间内的变化量，即结束时间的值减去开始时间的值
+     * 主要用于处理以_SUM结尾的标签，这些标签代表了某种累积或总计值
+     *
+     * @param tagNames 标签名称列表，多个标签名之间用分号分隔
+     * @param start 开始日期时间
+     * @param end 结束日期时间
+     * @return 返回一个映射，键为标签名，值为该标签在指定时间区间内的变化量字符串
+     */
+    public static Map<String, String> getIntervalValueBySumTag(String tagNames, Date start, Date end) {
+        // 将标签名称字符串分割并转换为列表
+        List<String> tagNameLists = Arrays.stream(tagNames.split(";")).collect(Collectors.toList());
+
+        // 检查每个标签名称是否以_SUM结尾，如果不是，则抛出异常
+        tagNameLists.forEach(tagName -> {
+            if (!StrUtil.endWith(tagName, "_SUM")) {
+                throw new RuntimeException("tagName must end with _SUM");
+            }
+        });
+
+        // 处理开始时间，如果start为null，则使用当前时间
+        Date startBegin = ApiUtil.isNullExec(start, () -> start);
+        // 计算开始时间的结束点，即开始时间加上1秒
+        Date startEnd = ApiUtil.isNullExec(start, () -> DateUtil.offsetSecond(start, 1));
+
+        // 处理结束时间，如果end为null，则使用当前时间
+        Date endBegin = ApiUtil.isNullExec(end, () -> end);
+        // 计算结束时间的结束点，即结束时间加上1秒
+        Date endEnd = ApiUtil.isNullExec(end, () -> DateUtil.offsetSecond(end, 1));
+
+        // 获取开始时间区间的数据
+        DataResult interpolatedBegin = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), startBegin, startEnd, 1, 1L);
+        // 将获取的数据转换为映射，键为标签名，值为标签值的双精度浮点数
+        Map<String, Double> beginSum = ApiUtil.convertOneDataByTagNames(interpolatedBegin.getData())
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                    return Convert.toDouble(StrUtil.trim(entry.getValue().toString()));
+                }));
+
+        // 获取结束时间区间的数据
+        DataResult interpolatedEnd = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), endBegin, endEnd, 1, 1L);
+        // 同样将获取的数据转换为映射
+        Map<String, Double> endSum = ApiUtil.convertOneDataByTagNames(interpolatedBegin.getData())
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                    return Convert.toDouble(StrUtil.trim(entry.getValue().toString()));
+                }));
+
+        // 计算每个标签在指定时间区间内的变化量，并将结果转换为映射
+        Map<String, String> intervalValues = tagNameLists.stream().collect(Collectors.toMap(tagName -> tagName, tagName -> {
+            return Convert.toStr(endSum.get(tagName) - beginSum.get(tagName));
+        }));
+
+        // 返回计算结果
+        return intervalValues;
     }
 
     /**
@@ -353,8 +415,8 @@ public class DataApiInvoker {
     public static DataResult getRawDataByRequestParam(String tagNames, Date start, Date end, Direction direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("direction", direction);
         params.put("count", count);
 
@@ -377,8 +439,8 @@ public class DataApiInvoker {
      */
     public static DataResult getRawDataByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Direction direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("direction", direction);
         params.put("count", count);
 
@@ -402,8 +464,8 @@ public class DataApiInvoker {
      */
     public static DataResult getRawDataByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Direction direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("direction", direction);
         params.put("count", count);
 
@@ -428,8 +490,8 @@ public class DataApiInvoker {
     public static DataResult getRawDataByPathVariable(String tagNames, Date start, Date end, Direction direction, Integer count) {
         Map<String, Object> params = new HashMap<>();
         params.put("tagNames", tagNames);
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("direction", direction);
         params.put("count", count);
 
@@ -478,8 +540,8 @@ public class DataApiInvoker {
         Map<String, Object> params = new HashMap<>();
         params.put("calculationMode", calculationMode);
         // 格式化日期参数，确保日期格式符合API要求
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         params.put("count", count);
         params.put("direction", direction);
         params.put("filterExpression", filterExpression);
@@ -550,8 +612,8 @@ public class DataApiInvoker {
         // 将计算模式放入参数映射
         params.put("calculationMode", calculationMode);
         // 将开始和结束时间按照UTC格式转换并放入参数映射
-        params.put("start",  ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
-        params.put("end",  ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
+        params.put("start", ApiUtil.isNullExec(start, () -> DateUtil.format(start, DatePattern.UTC_FORMAT)));
+        params.put("end", ApiUtil.isNullExec(end, () -> DateUtil.format(end, DatePattern.UTC_FORMAT)));
         // 将请求的数据点数量放入参数映射
         params.put("count", count);
         // 将数据查询方向放入参数映射
