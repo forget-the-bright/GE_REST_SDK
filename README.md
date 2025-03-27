@@ -18,7 +18,7 @@
 <dependency>
     <groupId>io.github.forget-the-bright</groupId>
     <artifactId>GE_REST_SDK</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4.4</version>
 </dependency>
 ```
 ### springboot 配置
@@ -67,66 +67,111 @@ ge:
 ### 目录结构
 ```cmd
 GE_REST_SDK\
-├── src\
-│   ├── main\
-│   │   ├── java\
-│   │   │   └── io\github\forget_the_bright\ge\
-│   │   │       ├── constant\
-│   │   │       │   ├── ApiModule.java
-│   │   │       │   ├── CalculationMode.java
-│   │   │       │   ├── CollectorsApiEnum.java
-│   │   │       │   ├── DataApiEnum.java
-│   │   │       │   ├── Direction.java
-│   │   │       │   ├── FilterMode.java
-│   │   │       │   ├── OAuthApiEnum.java
-│   │   │       │   ├── Quality.java
-│   │   │       │   ├── ReturnDataFields.java
-│   │   │       │   ├── SamplingMode.java
-│   │   │       │   ├── SystemsApiEnum.java
-│   │   │       │   └── TagsApiEnum.java
-│   │   │       ├── config\
-│   │   │       │   └── ApiConfig.java
-│   │   │       ├── core\
-│   │   │       │   ├── ApiClient.java
-│   │   │       │   └── ApiUtil.java
-│   │   │       ├── entity\
-│   │   │       │   ├── request\
-│   │   │       │   │   ├── alarm\
-│   │   │       │   │   │   ├── AlarmDeleteBackupEntity.java
-│   │   │       │   │   │   ├── AlarmNotificationInfoEntity.java
-│   │   │       │   │   │   └── AlarmQueryInfoEntity.java
-│   │   │       │   │   ├── collectors\
-│   │   │       │   │   │   └── CollectorEntity.java
-│   │   │       │   │   ├── data\
-│   │   │       │   │   │   ├── SampledEntity.java
-│   │   │       │   │   │   ├── TagDataCreationEntity.java
-│   │   │       │   │   │   └── TrendEntity.java
-│   │   │       │   │   ├── systems\
-│   │   │       │   │   │   ├── HistorianServerEntity.java
-│   │   │       │   │   │   └── HorizontalScalabilityEntity.java
-│   │   │       │   │   └── tags\
-│   │   │       │   │       └── TagCommentEntity.java
-│   │   │       │   └── response\
-│   │   │       │       └── BaseResult.java
-│   │   │       ├── exception\
-│   │   │       │   └── ApiException.java
-│   │   │       ├── service\
-│   │   │       │   ├── AlarmApiInvoker.java
-│   │   │       │   ├── CollectorsApiInvoker.java
-│   │   │       │   ├── DataApiInvoker.java
-│   │   │       │   ├── SystemsApiInvoker.java
-│   │   │       │   └── TagsApiInvoker.java
-│   │   │       └── utils\
-│   │   │           └── HaoUtil.java
-│   │   └── resources\
-│   │       └── application.properties
-│   └── test\
-│       └── java\
-│           └── io\github\forget_the_bright\ge\
-│               └── test\
-│                   └── ApiClientTest.java
-├── README.md
-└── pom.xml
+│  .gitignore
+│  LICENSE
+│  pom.xml
+│  README.md
+└─src
+    └─main
+        ├─java
+        │  └─io
+        │      └─github
+        │          └─forget_the_bright
+        │              │  Main.java
+        │              │
+        │              └─ge
+        │                  ├─annotation
+        │                  │      EnumParam.java
+        │                  │
+        │                  ├─config
+        │                  │      ApiConfig.java
+        │                  │      DataCollectionAutoConfiguration.java
+        │                  │      EnumParamArgumentResolver.java
+        │                  │      ResolverBeanPostProcessor.java
+        │                  │
+        │                  ├─constant
+        │                  │  │  AlarmApiEnum.java
+        │                  │  │  CollectorsApiEnum.java
+        │                  │  │  DataApiEnum.java
+        │                  │  │  OAuthApiEnum.java
+        │                  │  │  SystemsApiEnum.java
+        │                  │  │  TagsApiEnum.java
+        │                  │  │
+        │                  │  ├─attach
+        │                  │  │      ApiModule.java
+        │                  │  │      AuthScheme.java
+        │                  │  │      ParamPosition.java
+        │                  │  │
+        │                  │  └─common
+        │                  │          CalculationMode.java
+        │                  │          Direction.java
+        │                  │          FilterMode.java
+        │                  │          Quality.java
+        │                  │          ReturnDataFields.java
+        │                  │          SamplingMode.java
+        │                  │
+        │                  ├─core
+        │                  │  │  ApiClient.java
+        │                  │  │  ApiUtil.java
+        │                  │  │  CacheHolder.java
+        │                  │  │  LocalTimedCacheHolder.java
+        │                  │  │  RedisCacheHolder.java
+        │                  │  │  TokenHolder.java
+        │                  │  │
+        │                  │  └─print
+        │                  │          PrintUtil.java
+        │                  │
+        │                  ├─entity
+        │                  │  │  HistorianUnit.java
+        │                  │  │
+        │                  │  ├─request
+        │                  │  │  ├─alarm
+        │                  │  │  │      AlarmAttributesEntity.java
+        │                  │  │  │      AlarmDeleteBackupEntity.java
+        │                  │  │  │      AlarmInfoEntity.java
+        │                  │  │  │      AlarmNotificationInfoEntity.java
+        │                  │  │  │      AlarmQueryInfoEntity.java
+        │                  │  │  │
+        │                  │  │  ├─collectors
+        │                  │  │  │      CollectorEntity.java
+        │                  │  │  │
+        │                  │  │  ├─data
+        │                  │  │  │      DataSampleEntity.java
+        │                  │  │  │      SampledEntity.java
+        │                  │  │  │      TagDataCreationEntity.java
+        │                  │  │  │      TrendEntity.java
+        │                  │  │  │
+        │                  │  │  ├─systems
+        │                  │  │  │      HistorianServerEntity.java
+        │                  │  │  │      HorizontalScalabilityEntity.java
+        │                  │  │  │
+        │                  │  │  └─tags
+        │                  │  │          TagCommentEntity.java
+        │                  │  │          TagNamesEntity.java
+        │                  │  │
+        │                  │  └─response
+        │                  │      │  DataResult.java
+        │                  │      │  TagsResult.java
+        │                  │      │
+        │                  │      └─base
+        │                  │              BaseResult.java
+        │                  │              DataItem.java
+        │                  │              Sample.java
+        │                  │
+        │                  ├─exception
+        │                  │      ApiException.java
+        │                  │
+        │                  └─service
+        │                          AlarmApiInvoker.java
+        │                          CollectorsApiInvoker.java
+        │                          DataApiInvoker.java
+        │                          SystemsApiInvoker.java
+        │                          TagsApiInvoker.java
+        │
+        └─resources
+            └─META-INF
+                    spring.factories
+
 
 ```
 
@@ -207,6 +252,10 @@ GE_REST_SDK\
   - `getInterpolatedByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs)`：查询标签列表的插值。
   - `getInterpolatedByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Integer count, Long intervalMs)`：查询标签列表的插值。
   - `getInterpolatedByPathVariable(String tagNames, Date start, Date end, Integer count, Long intervalMs)`：根据路径变量查询标签列表的插值。
+  - `getHistorianDataByInterpolated(String tagNames, HistorianUnit historianUnit)`：根据插值方式获取历史数据。
+  - `getHistorianDataByInterpolated(String tagNames, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit)`：根据插值方式获取历史数据，通过总时间长度和间隔来计算查询参数。
+  - `getHistorianDataByInterpolated(String tagNames, Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit)`：根据插值方式获取历史数据，通过特定日期和总时间长度、间隔来计算查询参数。
+  - `getIntervalValueBySumTag(String tagNames, Date start, Date end)`：根据总和标签获取区间值。
   - `getRawDataByRequestParam(String tagNames, Date start, Date end, Direction direction, Integer count)`：根据请求参数查询原始数据。
   - `getRawDataByRequestParamPost(TagNamesEntity tagNamesEntity, Date start, Date end, Direction direction, Integer count)`：查询原始数据。
   - `getRawDataByPathVariablePost(TagNamesEntity tagNamesEntity, Date start, Date end, Direction direction, Integer count)`：查询原始数据。

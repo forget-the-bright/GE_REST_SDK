@@ -2,10 +2,10 @@
 package io.github.forget_the_bright.ge.core;
 
 import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.*;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
+import io.github.forget_the_bright.ge.entity.HistorianUnit;
 import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.Sample;
 
@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -121,6 +122,7 @@ public class ApiUtil {
         }));
         return collect;
     }
+
     /**
      * 根据数据项列表转换时间戳为Date对象列表
      * 此方法主要用于从数据项集合中提取时间戳，并将其转换为Date对象列表
@@ -144,7 +146,7 @@ public class ApiUtil {
      * 此方法主要用于从数据项集合中提取时间戳，并将其按照指定的格式转换为字符串列表
      * 如果数据项为空或第一个数据项的样本为空，则返回空列表
      *
-     * @param data 数据项列表，包含时间戳信息
+     * @param data   数据项列表，包含时间戳信息
      * @param format 日期格式字符串，用于格式化时间戳
      * @return 字符串列表，表示按照指定格式转换后的时间
      */
@@ -171,5 +173,64 @@ public class ApiUtil {
     public static List<String> convertFormatTimeByTagNames(List<DataItem> data) {
         // 调用重载方法，使用默认的日期格式
         return convertFormatTimeByTagNames(data, DatePattern.NORM_DATETIME_PATTERN);
+    }
+
+    /**
+     * 根据给定的日期和时间单位计算历史单元的开始日期、结束日期、计数和间隔时间
+     *
+     * @param metaDate     起始日期，如果为null，则使用当前日期作为起始日期
+     * @param total        总时间的量值
+     * @param totalUnit    总时间的时间单位
+     * @param interval     间隔时间的量值
+     * @param intervalUnit 间隔时间的时间单位
+     * @return 返回一个包含开始日期、结束日期、计数和间隔时间毫秒数的HistorianUnit对象
+     */
+    public static HistorianUnit calculateCountAndTimes(Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        // 确定结束日期，如果metaDate为null，则使用当前日期
+        Date end = Optional.ofNullable(metaDate).orElse(new DateTime());
+        Date begin = null;
+        int count = 0;
+
+        // 计算开始日期，通过结束日期向前偏移总时间得到
+        begin = DateUtil.offset(end, convertToDateField(totalUnit), -total);
+
+        // 计算计数，通过总时间除以间隔时间得到
+        long totalDurationInMinutes = totalUnit.toMinutes(total);
+        long intervalDurationInMinutes = intervalUnit.toMinutes(interval);
+        count = (int) (totalDurationInMinutes / intervalDurationInMinutes);
+
+        // 计算间隔时间的毫秒数
+        long intervalMs = intervalUnit.toMillis(interval);
+
+        // 返回包含开始日期、结束日期、计数和间隔时间毫秒数的HistorianUnit对象
+        return new HistorianUnit().setCount(count).setBegin(begin).setEnd(end).setIntervalMs(intervalMs);
+    }
+
+    public static HistorianUnit calculateCountAndTimes(int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        return calculateCountAndTimes(null, total, totalUnit, interval, intervalUnit);
+    }
+
+    /**
+     * 将给定的时间单位转换为DateField对象
+     * 此方法用于处理时间单位的转换，将其转换为DateField对象，以便在日期操作中使用
+     *
+     * @param timeUnit 时间单位，用于表示要转换的原始时间值
+     * @return DateField对象，表示转换后的日期字段
+     */
+    public static DateField convertToDateField(TimeUnit timeUnit) {
+        switch (timeUnit) {
+            case DAYS:
+                return DateField.DAY_OF_YEAR;
+            case HOURS:
+                return DateField.HOUR;
+            case MINUTES:
+                return DateField.MINUTE;
+            case SECONDS:
+                return DateField.SECOND;
+            case MILLISECONDS:
+                return DateField.MILLISECOND;
+            default:
+                throw new IllegalArgumentException("Unsupported TimeUnit for conversion to DateField");
+        }
     }
 }

@@ -10,6 +10,7 @@ import io.github.forget_the_bright.ge.constant.attach.ApiModule;
 import io.github.forget_the_bright.ge.constant.common.*;
 import io.github.forget_the_bright.ge.core.ApiClient;
 import io.github.forget_the_bright.ge.core.ApiUtil;
+import io.github.forget_the_bright.ge.entity.HistorianUnit;
 import io.github.forget_the_bright.ge.entity.request.data.SampledEntity;
 import io.github.forget_the_bright.ge.entity.request.data.TagDataCreationEntity;
 import io.github.forget_the_bright.ge.entity.request.data.TrendEntity;
@@ -18,6 +19,7 @@ import io.github.forget_the_bright.ge.entity.response.DataResult;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class DataApiInvoker {
@@ -339,6 +341,63 @@ public class DataApiInvoker {
                 DataApiEnum.GET_INTERPOLATED_BY_PATH_VARIABLE,
                 params
         );
+    }
+
+    /**
+     * 根据插值方式获取历史数据
+     *
+     * @param tagNames 标签名称，用于指定需要查询的数据类型
+     * @param historianUnit 历史数据单元，包含查询的时间范围、数据点数量和时间间隔
+     * @return 返回查询到的历史数据结果
+     */
+    public static DataResult getHistorianDataByInterpolated(String tagNames, HistorianUnit historianUnit) {
+        return getInterpolatedByRequestParamPost(
+                new TagNamesEntity().setTagNames(tagNames),
+                historianUnit.getBegin(),
+                historianUnit.getEnd(),
+                historianUnit.getCount(),
+                historianUnit.getIntervalMs());
+    }
+
+    /**
+     * 根据插值方式获取历史数据，通过总时间长度和间隔来计算查询参数
+     *
+     * @param tagNames 标签名称，用于指定需要查询的数据类型
+     * @param total 总时间长度的值
+     * @param totalUnit 总时间长度的时间单位
+     * @param interval 间隔的时间长度值
+     * @param intervalUnit 间隔的时间长度的时间单位
+     * @return 返回查询到的历史数据结果
+     */
+    public static DataResult getHistorianDataByInterpolated(String tagNames, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        HistorianUnit historianUnit = ApiUtil.calculateCountAndTimes(total, totalUnit, interval, intervalUnit);
+        return getInterpolatedByRequestParamPost(
+                new TagNamesEntity().setTagNames(tagNames),
+                historianUnit.getBegin(),
+                historianUnit.getEnd(),
+                historianUnit.getCount(),
+                historianUnit.getIntervalMs());
+    }
+
+    /**
+     * 根据插值方式获取历史数据，通过特定日期和总时间长度、间隔来计算查询参数
+     *
+     * @param tagNames 标签名称，用于指定需要查询的数据类型
+     * @param metaDate 特定日期，用于计算查询的时间范围
+     * @param total 总时间长度的值
+     * @param totalUnit 总时间长度的时间单位
+     * @param interval 间隔的时间长度值
+     * @param intervalUnit 间隔时间长度的时间单位
+     * @return 返回查询到的历史数据结果
+     */
+    public static DataResult getHistorianDataByInterpolated(String tagNames, Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        HistorianUnit historianUnit = ApiUtil.calculateCountAndTimes(metaDate, total, totalUnit, interval, intervalUnit);
+        return getInterpolatedByRequestParamPost(
+                new TagNamesEntity().setTagNames(tagNames),
+                historianUnit.getBegin(),
+                historianUnit.getEnd(),
+                historianUnit.getCount(),
+                historianUnit.getIntervalMs());
     }
 
     /**
