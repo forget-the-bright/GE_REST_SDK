@@ -3,7 +3,6 @@ package io.github.forget_the_bright.ge.service;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.constant.DataApiEnum;
@@ -19,7 +18,6 @@ import io.github.forget_the_bright.ge.entity.response.DataResult;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DataApiInvoker {
 
@@ -348,8 +346,8 @@ public class DataApiInvoker {
      * 主要用于处理以_SUM结尾的标签，这些标签代表了某种累积或总计值
      *
      * @param tagNames 标签名称列表，多个标签名之间用分号分隔
-     * @param start 开始日期时间
-     * @param end 结束日期时间
+     * @param start    开始日期时间
+     * @param end      结束日期时间
      * @return 返回一个映射，键为标签名，值为该标签在指定时间区间内的变化量字符串
      */
     public static Map<String, String> getIntervalValueBySumTag(String tagNames, Date start, Date end) {
@@ -386,7 +384,7 @@ public class DataApiInvoker {
         // 获取结束时间区间的数据
         DataResult interpolatedEnd = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), endBegin, endEnd, 1, 1L);
         // 同样将获取的数据转换为映射
-        Map<String, Double> endSum = ApiUtil.convertOneDataByTagNames(interpolatedBegin.getData())
+        Map<String, Double> endSum = ApiUtil.convertOneDataByTagNames(interpolatedEnd.getData())
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
@@ -394,9 +392,14 @@ public class DataApiInvoker {
                 }));
 
         // 计算每个标签在指定时间区间内的变化量，并将结果转换为映射
-        Map<String, String> intervalValues = tagNameLists.stream().collect(Collectors.toMap(tagName -> tagName, tagName -> {
-            return Convert.toStr(endSum.get(tagName) - beginSum.get(tagName));
-        }));
+        Map<String, String> intervalValues = tagNameLists
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                tagName -> tagName,
+                                tagName -> Convert.toStr(endSum.get(tagName) - beginSum.get(tagName))
+                        )
+                );
 
         // 返回计算结果
         return intervalValues;
