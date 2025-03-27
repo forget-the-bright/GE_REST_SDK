@@ -16,6 +16,7 @@ import io.github.forget_the_bright.ge.entity.request.data.TrendEntity;
 import io.github.forget_the_bright.ge.entity.request.tags.TagNamesEntity;
 import io.github.forget_the_bright.ge.entity.response.DataResult;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -374,21 +375,21 @@ public class DataApiInvoker {
         // 获取开始时间区间的数据
         DataResult interpolatedBegin = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), startBegin, startEnd, 1, 1L);
         // 将获取的数据转换为映射，键为标签名，值为标签值的双精度浮点数
-        Map<String, Double> beginSum = ApiUtil.convertOneDataByTagNames(interpolatedBegin.getData())
+        Map<String, BigDecimal> beginSum = ApiUtil.convertOneDataByTagNames(interpolatedBegin.getData())
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    return Convert.toDouble(StrUtil.trim(entry.getValue().toString()));
+                    return Convert.toBigDecimal(StrUtil.trim(entry.getValue().toString()));
                 }));
 
         // 获取结束时间区间的数据
         DataResult interpolatedEnd = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), endBegin, endEnd, 1, 1L);
         // 同样将获取的数据转换为映射
-        Map<String, Double> endSum = ApiUtil.convertOneDataByTagNames(interpolatedEnd.getData())
+        Map<String, BigDecimal> endSum = ApiUtil.convertOneDataByTagNames(interpolatedEnd.getData())
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    return Convert.toDouble(StrUtil.trim(entry.getValue().toString()));
+                    return Convert.toBigDecimal(StrUtil.trim(entry.getValue().toString()));
                 }));
 
         // 计算每个标签在指定时间区间内的变化量，并将结果转换为映射
@@ -397,7 +398,7 @@ public class DataApiInvoker {
                 .collect(
                         Collectors.toMap(
                                 tagName -> tagName,
-                                tagName -> Convert.toStr(endSum.get(tagName) - beginSum.get(tagName))
+                                tagName -> Convert.toStr(endSum.get(tagName).subtract(beginSum.get(tagName)))
                         )
                 );
 
