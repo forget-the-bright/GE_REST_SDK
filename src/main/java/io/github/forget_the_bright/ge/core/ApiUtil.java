@@ -5,6 +5,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.*;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
+import io.github.forget_the_bright.ge.constant.common.Quality;
 import io.github.forget_the_bright.ge.entity.HistorianUnit;
 import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.Sample;
@@ -105,14 +106,17 @@ public class ApiUtil {
         // 使用Java 8 Stream API根据标签名收集数据项，对于每个标签名，提取其样本列表的第一个值
         Map<String, Object> collect = data.stream().collect(Collectors.toMap(DataItem::getTagName, dataItem -> {
             // 处理样本列表可能为空的情况，如果为空或null，则使用空列表或默认值避免空指针异常
-            String value = Optional.ofNullable(dataItem.getSamples())
+            Sample sample = Optional.ofNullable(dataItem.getSamples())
                     .orElse(ListUtil.empty())
                     .stream()
                     .findFirst()
-                    .orElse(new Sample().setValue(defaultValue))
-                    .getValue();
+                    .orElse(new Sample().setQuality(Quality.GOOD).setValue(defaultValue));
+            if (sample.getQuality() == Quality.BAD) {
+                sample.setValue(defaultValue);
+            }
+            String value = sample.getValue();
             return value;
-        }));
+        }, (oldValue, newValue) -> newValue));
         return collect;
     }
 
@@ -130,9 +134,10 @@ public class ApiUtil {
             // 处理样本列表可能为空的情况，如果为空或null，则使用空列表避免空指针异常
             List<String> values = Optional.ofNullable(dataItem.getSamples())
                     .orElse(ListUtil.empty())
-                    .stream().map(Sample::getValue).collect(Collectors.toList());
+                    .stream()
+                    .map(Sample::getValue).collect(Collectors.toList());
             return values;
-        }));
+        }, (oldValue, newValue) -> newValue));
         return collect;
     }
 
