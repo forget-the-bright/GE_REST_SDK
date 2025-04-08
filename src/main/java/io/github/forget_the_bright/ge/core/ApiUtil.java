@@ -213,8 +213,8 @@ public class ApiUtil {
         begin = DateUtil.offset(end, convertToDateField(totalUnit), -total);
 
         // 计算计数，通过总时间除以间隔时间得到
-        long totalDurationInMinutes = totalUnit.toMinutes(total);
-        long intervalDurationInMinutes = intervalUnit.toMinutes(interval);
+        long totalDurationInMinutes = totalUnit.toSeconds(total);
+        long intervalDurationInMinutes = intervalUnit.toSeconds(interval);
         count = (int) (totalDurationInMinutes / intervalDurationInMinutes);
 
         // 计算间隔时间的毫秒数
