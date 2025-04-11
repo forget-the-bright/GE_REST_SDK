@@ -1,5 +1,7 @@
 package io.github.forget_the_bright.ge.constant.common;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * This class represents the direction constants.
  * 该类表示方向常量。
@@ -42,5 +44,11 @@ public enum Direction {
      */
     public int getValue() {
         return value;
+    }
+
+    @JsonValue
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
 }
