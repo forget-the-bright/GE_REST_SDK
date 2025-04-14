@@ -212,7 +212,54 @@ public enum ErrorCode {
      */
     INVALID_CUSTOM_DATA_TYPE(-33),
 
-    // 其他状态码省略...
+
+    /**
+     * 用户定义的引用已存在。
+     * N/A
+     */
+    IH_STATUS_EXISTING_USERDEF_REFERENCES(-34),
+
+    /**
+     * 标签名称无效或已被删除。
+     * N/A
+     */
+    IH_STATUS_INVALID_TAGNAME_DELETEDTAG(-35),
+
+    /**
+     * DHS 节点名称无效。
+     * N/A
+     */
+    IH_STATUS_INVALID_DHS_NODENAME(-36),
+
+    /**
+     * DHS 服务正在使用中。
+     * N/A
+     */
+    IH_STATUS_DHS_SERVICE_IN_USE(-37),
+
+    /**
+     * DHS 存储正在使用中。
+     * N/A
+     */
+    IH_STATUS_DHS_STORAGE_IN_USE(-38),
+
+    /**
+     * 镜像中的 DHS 节点过多。
+     * N/A
+     */
+    IH_STATUS_DHS_TOO_MANY_NODES_IN_MIRROR(-39),
+
+    /**
+     * 存档已同步。
+     * N/A
+     */
+    IH_STATUS_ARCHIVE_IN_SYNC(-40),
+
+    /**
+     * 存档名称无效。
+     * N/A
+     */
+    INVALID_ARCHIVE_NAME(-41),
 
     /**
      * 会话 ID 无效。
@@ -230,7 +277,79 @@ public enum ErrorCode {
      * 未知错误，请检查服务器日志。
      * Unknown error, please check server log.
      */
-    UNKNOWN_ERROR(3);
+    UNKNOWN_ERROR(3),
+
+    /**
+     * 没有有效的客户端缓冲区管理器。
+     * No valid client buffer manager.
+     */
+    NO_VALID_CLIENT_BUFFER_MANAGER(4),
+
+    /**
+     * 返回的数据集中没有值。
+     * No value in returned data set.
+     */
+    NO_VALUE_IN_DATA_SET(5),
+
+    /**
+     * 标签不存在。
+     * Tag doesn't exist.
+     */
+    TAG_NOT_EXISTING(6),
+
+    /**
+     * 中央缓冲服务器调用失败。
+     * Service call to central buffer server fail.
+     */
+    CLIENT_BUFFER_MANAGER_COMMUNICATION_ERROR(7),
+
+    /**
+     * 不支持的标签类型。
+     * Tag type is not supported.
+     */
+    TAG_TYPE_NOT_SUPPORTED(8),
+
+    /**
+     * 值类型与标签数据类型不匹配。
+     * Value type doesn't match tag data type.
+     */
+    VALUE_TYPE_NOT_MATCH_TAG_DATA_TYPE(9),
+
+    /**
+     * 查询参数无效。
+     * Invalid query parameter.
+     */
+    INVALID_PARAMETER(10),
+
+    /**
+     * 标签搜索结果超过 5000 条。
+     * Tag Search Criteria result was more than 5000.
+     */
+    TAG_SEARCH_RESULT_IS_HUGE(11),
+
+    /**
+     * 无效的历史记录服务器。
+     * No valid server or historian server name isn't in the server list.
+     */
+    INVALID_HISTORIAN_SERVER(12),
+
+    /**
+     * 收集器类型无效。
+     * The collector type is not valid. For a list of collector types, refer to Collector Type and Subtype.
+     */
+    IH_STATUS_INVALID_INTERFACETYPE(-49),
+
+    /**
+     * 启动收集器失败。
+     * Starting the collector has failed.
+     */
+    IH_STATUS_INTERFACE_START_FAIL(-50),
+
+    /**
+     * 停止收集器失败。
+     * Stopping the collector has failed.
+     */
+    IH_STATUS_INTERFACE_STOP_FAIL(-51);
 
     private final int value;
 
