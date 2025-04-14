@@ -1,6 +1,8 @@
 package io.github.forget_the_bright.ge.entity.response.base;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.config.EnumDeSerialzer;
+import io.github.forget_the_bright.ge.constant.common.ErrorCode;
 
 /**
  * This class represents the base result for API responses.
@@ -15,8 +17,8 @@ public class BaseResult {
      * ErrorCode: The error code returned by the server.
      * 错误码：服务器返回的错误码。
      */
-    @JSONField(name = "ErrorCode")
-    private int errorCode;
+    @JSONField(name = "ErrorCode",deserializeUsing = EnumDeSerialzer.class)
+    private ErrorCode errorCode;
 
     /**
      * ErrorMessage: The error message returned by the server if an error occurs.
@@ -33,7 +35,7 @@ public class BaseResult {
      *
      * @return The error code.
      */
-    public int getErrorCode() {
+    public ErrorCode getErrorCode() {
         return errorCode;
     }
 
@@ -43,7 +45,7 @@ public class BaseResult {
      *
      * @param errorCode The error code to set.
      */
-    public void setErrorCode(int errorCode) {
+    public void setErrorCode(ErrorCode errorCode) {
         this.errorCode = errorCode;
     }
 
