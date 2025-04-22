@@ -1,19 +1,30 @@
 
 package io.github.forget_the_bright.ge.core;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.*;
+import cn.hutool.core.map.BiMap;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
+import io.github.forget_the_bright.ge.annotation.PointParam;
 import io.github.forget_the_bright.ge.constant.common.Quality;
+import io.github.forget_the_bright.ge.constant.common.ValueType;
 import io.github.forget_the_bright.ge.entity.HistorianUnit;
+import io.github.forget_the_bright.ge.entity.request.tags.TagNamesEntity;
+import io.github.forget_the_bright.ge.entity.response.DataResult;
 import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.Sample;
+import io.github.forget_the_bright.ge.exception.ApiException;
+import io.github.forget_the_bright.ge.service.DataApiInvoker;
+import io.swagger.annotations.Api;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -250,5 +261,133 @@ public class ApiUtil {
             default:
                 throw new IllegalArgumentException("Unsupported TimeUnit for conversion to DateField");
         }
+    }
+
+    /**
+     * 根据时间参数填充对象的值
+     * 该方法通过反射和映射关系，将特定时间点的数据填充到对象的相应字段中
+     *
+     * @param obj  要填充数据的对象
+     * @param date 用于查询数据的时间点
+     */
+    public static void fillValForObjByPointParam(Object obj, Date date) {
+        fillValForObjByPointParam(obj, date, "0");
+    }
+
+    public static void fillValForObjByPointParam(Object obj, Date date, String defaultValue) {
+        // 获取对象的类信息
+        Class<?> aClass = obj.getClass();
+        // 获取类中字段与时间序列点的映射关系
+        LinkedHashMap<Field, String> fieldPointByPointParam = getFieldPointByPointParam(aClass);
+        // 创建一个双向映射，以便于后续根据字段或时间序列点获取对应关系
+        BiMap<Field, String> biMap = new BiMap<>(fieldPointByPointParam);
+        // 将所有时间序列点合并为一个字符串，用于查询
+        String points = fieldPointByPointParam.values().stream().collect(Collectors.joining(";"));
+        // 调用API根据时间范围和时间序列点获取插值数据
+        DataResult interpolatedByRequestParamPost = DataApiInvoker
+                .getInterpolatedByRequestParamPost(
+                        new TagNamesEntity().setTagNames(points),
+                        date,
+                        date,
+                        1,
+                        1L);
+        // 将查询到的数据转换为一个映射，便于后续填充到对象中
+        Map<String, Object> valueMap = convertOneDataByTagNames(interpolatedByRequestParamPost.getData(), defaultValue);
+        // 遍历数据映射，将数据填充到对象的相应字段中
+        for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+            // 根据时间序列点获取对应的字段
+            Field field = biMap.getKey(entry.getKey());
+            if (field != null) {
+                // 获取字段值
+                Object value = entry.getValue();
+                String fieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(obj, field), "").toString();
+                // 字段值为空,就赋值
+                if (StrUtil.isEmpty(fieldValue.toString())) {
+                    // 使用反射将值设置到对象的字段中
+                    ReflectUtil.setFieldValue(obj, field, value);
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取指定类中所有被PointParam注解的字段及其对应的点位号参数
+     * 该方法首先获取类级别的PointParam注解信息，然后获取所有字段级别的PointParam注解信息，
+     * 并根据这些信息构建一个映射，键为字段，值为按照固定格式组成的点位号字符串
+     *
+     * @param aClass 要扫描的类
+     * @return 返回一个 LinkedHashMap，键是被 PointParam 注解的字段，值是格式化后的点位号字符串
+     * @throws ApiException 如果发现点位号重复，则抛出异常
+     */
+    public static LinkedHashMap<Field, String> getFieldPointByPointParam(Class<?> aClass) {
+        // 打印类上的所有注释
+        Annotation[] annotations = aClass.getAnnotations();
+        String workshop = null;
+        String stationNo = null;
+        ValueType valueType = null;
+        // 遍历类注解，寻找PointParam注解并提取其中的值
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof PointParam) {
+                PointParam pointParam = (PointParam) annotation;
+                if (StrUtil.isNotEmpty(pointParam.workshop())) {
+                    workshop = pointParam.workshop();
+                }
+                if (StrUtil.isNotEmpty(pointParam.stationNo())) {
+                    stationNo = pointParam.stationNo();
+                }
+                if (pointParam.type() != ValueType.NULL) {
+                    valueType = pointParam.type();
+                }
+            }
+        }
+        // 获取类中的所有字段
+        List<Field> fields = ListUtil.of(ReflectUtil.getFields(aClass));
+        // 定义点位号的格式模板
+        String template = "{}{}{}{}";
+        // 过滤出所有被PointParam注解的字段
+        List<Field> collect = fields.stream().filter(field -> field.isAnnotationPresent(PointParam.class)).collect(Collectors.toList());
+        LinkedHashMap<Field, String> pointFieldMap = new LinkedHashMap<>();
+        // 遍历被PointParam注解的字段，构建点位号字符串
+        for (Field field : collect) {
+            PointParam annotation = field.getAnnotation(PointParam.class);
+            String workshopField = workshop;
+            String stationNoField = stationNo;
+            ValueType typeField = valueType;
+            String value = annotation.value();
+            // 如果字段级别的注解有值，则使用字段级别的值
+            if (StrUtil.isNotEmpty(annotation.workshop())) {
+                workshopField = annotation.workshop();
+            }
+            if (StrUtil.isNotEmpty(annotation.stationNo())) {
+                stationNoField = annotation.stationNo();
+            }
+            if (annotation.type()  != ValueType.NULL) {
+                typeField = annotation.type();
+            }
+            // 格式化点位号字符串
+            workshopField = StrUtil.isBlank(workshopField) ? "" : workshopField + ".";
+            stationNoField = StrUtil.isBlank(stationNoField) ? "" : stationNoField + ".";
+            String type = typeField == null ? "" : "_" + typeField.name();
+            String pointStr = StrUtil.format(template, workshopField, stationNoField, value, type);
+            pointFieldMap.put(field, pointStr);
+        }
+        // 检查是否有重复的点位号，如果有则抛出异常
+        List<String> errorMsg = pointFieldMap
+                .entrySet()
+                .stream()
+                .collect(Collectors.groupingBy(Map.Entry::getValue))
+                .values()
+                .stream()
+                .filter(list -> list.size() > 1)
+                .map(list -> {
+                    String value = list.get(0).getValue();
+                    String filedNames = list.stream().map(entry -> entry.getKey().getName()).collect(Collectors.joining(","));
+                    return StrUtil.format("[{}]点位号重复在以下字段中：[{}]", value, filedNames);
+                }).collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(errorMsg)) {
+            throw new ApiException(JSONObject.toJSONString(errorMsg));
+        }
+        // 返回字段与点位号的映射
+        return pointFieldMap;
     }
 }
