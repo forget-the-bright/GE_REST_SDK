@@ -361,7 +361,7 @@ public class ApiUtil {
             if (StrUtil.isNotEmpty(annotation.stationNo())) {
                 stationNoField = annotation.stationNo();
             }
-            if (annotation.type()  != ValueType.NULL) {
+            if (annotation.type() != ValueType.NULL) {
                 typeField = annotation.type();
             }
             // 格式化点位号字符串
@@ -384,6 +384,181 @@ public class ApiUtil {
                     String filedNames = list.stream().map(entry -> entry.getKey().getName()).collect(Collectors.joining(","));
                     return StrUtil.format("[{}]点位号重复在以下字段中：[{}]", value, filedNames);
                 }).collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(errorMsg)) {
+            throw new ApiException(JSONObject.toJSONString(errorMsg));
+        }
+        // 返回字段与点位号的映射
+        return pointFieldMap;
+    }
+
+    public static <T> void fillValForObjsByPointParam(List<T> objs) {
+        fillValForObjsByPointParam(objs, new Date(), "0");
+    }
+
+    /**
+     * 根据时间序列点参数为对象列表填充值
+     *
+     * @param objs         对象列表，需要填充值的列表
+     * @param date         日期，用于获取数据的基准时间
+     * @param defaultValue 默认值，当获取的数据为空时使用的值
+     */
+    public static <T> void fillValForObjsByPointParam(List<T> objs, Date date, String defaultValue) {
+        // 检查对象列表是否为空，为空则直接返回
+        if (CollUtil.isEmpty(objs)) return;
+        // 检查日期是否为空，为空则使用当前日期
+        if (ObjectUtil.isEmpty(date)) date = new Date();
+
+        // 获取第一个对象用于后续获取类信息
+        T obj = objs.get(0);
+        // 获取对象的类信息
+        Class<?> aClass = obj.getClass();
+        // 获取类中字段与时间序列点的映射关系
+        LinkedHashMap<Field, List<String>> fieldPointsByPointParam = getFieldPointsByPointParam(aClass);
+        String tagNames = fieldPointsByPointParam.values().stream().flatMap(list -> list.stream()).collect(Collectors.joining(";"));
+        // 调用API根据时间范围和时间序列点获取插值数据
+        DataResult interpolatedByRequestParamPost = DataApiInvoker
+                .getInterpolatedByRequestParamPost(
+                        new TagNamesEntity().setTagNames(tagNames),
+                        date,
+                        date,
+                        1,
+                        1L);
+        // 将查询到的数据转换为一个映射，便于后续填充到对象中
+        Map<String, Object> valueMap = convertOneDataByTagNames(interpolatedByRequestParamPost.getData(), defaultValue);
+        // 遍历每个字段及其对应的时间序列点
+        fieldPointsByPointParam.forEach((field, points) -> {
+            // 获取字段上的PointParam注解
+            PointParam annotation = field.getAnnotation(PointParam.class);
+            // 获取注解中指定的字段名
+            String fieldName = annotation.fieldName();
+            // 根据字段名获取字段
+            Field fieldByName = ReflectUtil.getField(aClass, fieldName);
+            // 如果字段为空，则直接返回
+            if (fieldByName == null) return;
+            // 将注解中的字段值转换为列表
+            List<String> fieldValues = Arrays.stream(annotation.fieldValues()).collect(Collectors.toList());
+            // 遍历每个时间序列点和对应的字段值
+            for (int i = 0; i < points.size(); i++) {
+                String point = points.get(i);
+                String fieldValue = fieldValues.get(i);
+                // 获取对应时间序列点的数据
+                Object objValue = valueMap.get(point);
+                // 遍历对象列表，为符合条件的对象填充字段值
+                objs.forEach(item -> {
+                    // 获取判断字段值
+                    Object itemFieldValue = ReflectUtil.getFieldValue(item, fieldByName);
+                    // 获取字段值
+                    String relFieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(item, field), "").toString();
+                    // 如果判断字段值匹配且字段值为空，则填充字段值
+                    if (itemFieldValue.equals(fieldValue) && StrUtil.isEmpty(relFieldValue)) {
+                        ReflectUtil.setFieldValue(item, field, objValue);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * 根据PointParam注解获取类中字段对应的点位号
+     * 该方法首先获取类上标注的PointParam注解信息，然后遍历类中的所有字段
+     * 对于每个标注了PointParam注解的字段，根据注解中的信息和类级别的信息生成点位号
+     * 如果存在重复的点位号，则抛出异常
+     *
+     * @param aClass 要处理的类
+     * @return 返回一个映射，键是字段，值是该字段对应的点位号列表
+     * @throws ApiException 如果存在重复的点位号，则抛出此异常
+     */
+    public static LinkedHashMap<Field, List<String>> getFieldPointsByPointParam(Class<?> aClass) {
+        // 打印类上的所有注释
+        Annotation[] annotations = aClass.getAnnotations();
+        String workshop = null;
+        String stationNo = null;
+        ValueType valueType = null;
+        // 遍历类注解，寻找PointParam注解并提取其中的值
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof PointParam) {
+                PointParam pointParam = (PointParam) annotation;
+                if (StrUtil.isNotEmpty(pointParam.workshop())) {
+                    workshop = pointParam.workshop();
+                }
+                if (StrUtil.isNotEmpty(pointParam.stationNo())) {
+                    stationNo = pointParam.stationNo();
+                }
+                if (pointParam.type() != ValueType.NULL) {
+                    valueType = pointParam.type();
+                }
+            }
+        }
+        // 获取类中的所有字段
+        List<Field> fields = ListUtil.of(ReflectUtil.getFields(aClass));
+        // 定义点位号的格式模板
+        String template = "{}{}{}{}";
+        // 过滤出所有被PointParam注解的字段
+        List<Field> collect = fields.stream().filter(field -> {
+                    if (field.isAnnotationPresent(PointParam.class)) {
+                        PointParam annotation = field.getAnnotation(PointParam.class);
+                        String fieldName = annotation.fieldName();
+                        String[] fieldValues = annotation.fieldValues();
+                        String[] values = annotation.values();
+                        if (StrUtil.isNotEmpty(fieldName) && ArrayUtil.isNotEmpty(fieldValues) && ArrayUtil.isNotEmpty(values)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+        LinkedHashMap<Field, List<String>> pointFieldMap = new LinkedHashMap<>();
+        // 遍历被PointParam注解的字段，构建点位号字符串
+        for (Field field : collect) {
+            PointParam annotation = field.getAnnotation(PointParam.class);
+            String workshopField = workshop;
+            String stationNoField = stationNo;
+            ValueType typeField = valueType;
+            String[] values = annotation.values();
+            // 如果字段级别的注解有值，则使用字段级别的值
+            if (StrUtil.isNotEmpty(annotation.workshop())) {
+                workshopField = annotation.workshop();
+            }
+            if (StrUtil.isNotEmpty(annotation.stationNo())) {
+                stationNoField = annotation.stationNo();
+            }
+            if (annotation.type() != ValueType.NULL) {
+                typeField = annotation.type();
+            }
+            // 格式化点位号字符串
+            workshopField = StrUtil.isBlank(workshopField) ? "" : workshopField + ".";
+            stationNoField = StrUtil.isBlank(stationNoField) ? "" : stationNoField + ".";
+            String type = typeField == null ? "" : "_" + typeField.name();
+            List<String> pointStrs = new ArrayList<>();
+            for (String value : values) {
+                String pointStr = StrUtil.format(template, workshopField, stationNoField, value, type);
+                pointStrs.add(pointStr);
+            }
+            pointFieldMap.put(field, pointStrs);
+        }
+        // 检查是否有重复的点位号，如果有则抛出异常
+        List<String> errorMsg = pointFieldMap
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    if (entry.getValue().size() > 1) {
+                        List<String> msgStrs = entry
+                                .getValue()
+                                .stream()
+                                .collect(Collectors.groupingBy(Function.identity()))
+                                .values()
+                                .stream()
+                                .filter(points -> points.size() > 1)
+                                .map(points -> StrUtil.format("[{}]点位号重复,次数{}", points.get(0), points.size()))
+                                .collect(Collectors.toList());
+                        if (CollUtil.isNotEmpty(msgStrs)) {
+                            Field key = entry.getKey();
+                            return StrUtil.format("字段[{}]出现重复点位: {} ", key.getName(), msgStrs);
+                        }
+                    }
+                    return "";
+                })
+                .filter(StrUtil::isNotEmpty).collect(Collectors.toList());
         if (CollUtil.isNotEmpty(errorMsg)) {
             throw new ApiException(JSONObject.toJSONString(errorMsg));
         }

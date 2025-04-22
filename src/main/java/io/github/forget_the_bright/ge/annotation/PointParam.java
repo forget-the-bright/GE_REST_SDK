@@ -3,6 +3,7 @@ package io.github.forget_the_bright.ge.annotation;
 import io.github.forget_the_bright.ge.constant.common.ValueType;
 
 import java.lang.annotation.*;
+import java.lang.reflect.Field;
 
 /**
  * 用于标记和提供点参数信息的注解
@@ -21,6 +22,29 @@ public @interface PointParam {
      */
     String value() default "";
 
+    /**
+     * 获取一组值
+     * <p>
+     * 此方法用于返回一个字符串数组，数组中包含了特定的值集合这些值可以是预定义的，
+     * 从其他来源获取的，或者是通过特定逻辑计算得出的此方法不接受任何参数，
+     * 且返回的数组可以直接用于进一步的处理或展示
+     *
+     * @return String[] 返回一个字符串数组，包含了一组特定的值
+     */
+    String[] values() default {};
+    /**
+     * 默认提供一个空字符串数组，用于获取字段的值
+     * 这个方法主要用于获取与字段相关的值的数组
+     * 默认值为空数组，意味着在没有特别配置的情况下，它将返回一个空的字符串数组
+     */
+    String[] fieldValues() default {};
+
+    /**
+     * 默认提供一个空字符串，用于指定字段的名称
+     * 这个方法主要用于指定或获取字段的名称
+     * 默认值为空字符串，表示在没有特别配置时，它将返回一个空的字符串
+     */
+    String fieldName() default "";
     /**
      * 车间的标识
      * 用于指定参数所属的车间
