@@ -5,10 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.*;
 import cn.hutool.core.map.BiMap;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.annotation.PointParam;
 import io.github.forget_the_bright.ge.constant.common.Quality;
@@ -20,7 +17,6 @@ import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.Sample;
 import io.github.forget_the_bright.ge.exception.ApiException;
 import io.github.forget_the_bright.ge.service.DataApiInvoker;
-import io.swagger.annotations.Api;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -104,6 +100,10 @@ public class ApiUtil {
         return convertOneDataByTagNames(data, "0");
     }
 
+    public static Map<String, Object> convertOneDataByTagNames(List<DataItem> data, String defaultValue) {
+        return convertOneDataByTagNames(data, "0", 0);
+    }
+
     /**
      * 根据标签名称转换单个数据项到一个映射中
      * 此方法用于处理一组数据项，每个数据项包含多个标签和对应的值通过指定的标签名称，
@@ -111,9 +111,10 @@ public class ApiUtil {
      *
      * @param data         包含多个DataItem对象的列表，每个DataItem对象包含一组标签和值
      * @param defaultValue 如果指定的标签在数据项中不存在时，使用的默认值
+     * @param scale        保留有效数字的位数
      * @return 返回一个映射，其中键是数据项中的标签值（如果存在），值是数据项本身
      */
-    public static Map<String, Object> convertOneDataByTagNames(List<DataItem> data, String defaultValue) {
+    public static Map<String, Object> convertOneDataByTagNames(List<DataItem> data, String defaultValue, Integer scale) {
         // 使用Java 8 Stream API根据标签名收集数据项，对于每个标签名，提取其样本列表的第一个值
         Map<String, Object> collect = data.stream().collect(Collectors.toMap(DataItem::getTagName, dataItem -> {
             // 处理样本列表可能为空的情况，如果为空或null，则使用空列表或默认值避免空指针异常
@@ -126,6 +127,9 @@ public class ApiUtil {
                 sample.setValue(defaultValue);
             }
             String value = sample.getValue();
+            if (!defaultValue.equals(value) && scale > 0) { // 如果值不是默认值，则保留指定位数
+                value = retainSignificantDecimals(value, scale);
+            }
             return value;
         }, (oldValue, newValue) -> newValue));
         return collect;
@@ -263,6 +267,7 @@ public class ApiUtil {
         }
     }
 
+
     /**
      * 根据时间参数填充对象的值
      * 该方法通过反射和映射关系，将特定时间点的数据填充到对象的相应字段中
@@ -390,6 +395,7 @@ public class ApiUtil {
         // 返回字段与点位号的映射
         return pointFieldMap;
     }
+
 
     public static <T> void fillValForObjsByPointParam(List<T> objs) {
         fillValForObjsByPointParam(objs, new Date(), "0");
@@ -565,4 +571,61 @@ public class ApiUtil {
         // 返回字段与点位号的映射
         return pointFieldMap;
     }
+
+
+    /**
+     * 保留数字字符串中的指定位数的有效小数。
+     * 如果数字字符串不是有效的数字，则直接返回原字符串。
+     * 如果数字字符串中没有小数部分，则在末尾补零以确保至少有指定的小数位数。
+     *
+     * @param number 要处理的数字字符串
+     * @param scale  保留的有效小数位数
+     * @return 处理后的数字字符串，保留指定位数的有效小数
+     */
+    public static String retainSignificantDecimals(String number, Integer scale) {
+        if (ObjectUtil.isNotEmpty(scale) || scale <= 0) return number; // 如果scale小于等于0，则直接返回原字符串
+        if (StrUtil.isEmpty(number) || !NumberUtil.isNumber(number)) return number; // 如果number不是数字，则直接返回原字符串
+        // 将数字转换为字符串（避免科学计数法）
+        String numberStr = NumberUtil.toBigDecimal(number).toPlainString();
+
+        // 分割整数部分和小数部分
+        if (!StrUtil.contains(numberStr, '.')) {
+            // 没有小数部分，直接返回原值或补零
+            return numberStr; //StrUtil.padAfter("", scale, "0")
+        }
+        String[] parts = StrUtil.splitToArray(numberStr, '.');
+        String integerPart = parts[0];
+        String decimalPart = parts[1];
+
+        int decimalPartLength = decimalPart.length();
+        // 如果scale大于小数部分的长度，则直接返回原字符串
+        if (scale > decimalPartLength) {
+            return numberStr;
+        }
+
+        int lastSignificantIndex = -1;
+
+        for (int i = 0; i < decimalPartLength; i++) {
+            if (decimalPart.charAt(i) != '0') {
+                lastSignificantIndex = i;
+                break;
+            }
+        }
+        // 如果找到了两位有效数字，则截取到该位置
+        if (lastSignificantIndex == -1) {
+            // 如果没有有效数字，返回整数部分
+            return integerPart; //StrUtil.padAfter("", scale, "0")
+        }
+
+        int subLength = lastSignificantIndex + scale;
+        String resultStr = "";
+        if (subLength > decimalPartLength) {
+            resultStr = numberStr;
+        } else {
+            resultStr = decimalPart.substring(0, subLength);
+        }
+        resultStr = StrUtil.trim(resultStr, 1, character -> character == '0');
+        return integerPart + "." + resultStr;
+    }
+
 }
