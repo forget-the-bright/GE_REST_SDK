@@ -249,7 +249,7 @@ public class ApiUtil {
     }
 
     public static HistorianUnit calculateCountAndTimes(Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
-        return calculateCountAndTimes(null, total, totalUnit, interval, intervalUnit, Boolean.FALSE);
+        return calculateCountAndTimes(metaDate, total, totalUnit, interval, intervalUnit, Boolean.FALSE);
     }
 
     public static HistorianUnit calculateCountAndTimes(int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit, Boolean isRound) {
