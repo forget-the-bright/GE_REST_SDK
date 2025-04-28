@@ -18,7 +18,7 @@
 <dependency>
     <groupId>io.github.forget-the-bright</groupId>
     <artifactId>GE_REST_SDK</artifactId>
-    <version>1.0.5.5</version>
+    <version>1.0.5.6</version>
 </dependency>
 ```
 ### springboot 配置

@@ -673,7 +673,7 @@ public class ApiUtil {
      * @return 处理后的数字字符串，保留指定位数的有效小数
      */
     public static String retainSignificantDecimals(String number, Integer scale) {
-        if (ObjectUtil.isNotEmpty(scale) || scale <= 0) return number; // 如果scale小于等于0，则直接返回原字符串
+        if (ObjectUtil.isEmpty(scale) || scale <= 0) return number; // 如果scale小于等于0，则直接返回原字符串
         if (StrUtil.isEmpty(number) || !NumberUtil.isNumber(number)) return number; // 如果number不是数字，则直接返回原字符串
         // 将数字转换为字符串（避免科学计数法）
         String numberStr = NumberUtil.toBigDecimal(number).toPlainString();
