@@ -3,6 +3,7 @@ package io.github.forget_the_bright.ge.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.*;
 import cn.hutool.core.map.BiMap;
 import cn.hutool.core.util.*;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  */
 public class ApiUtil {
 
+    //region 空处理方法
     /**
      * 如果对象为 null 或空，则返回 null；否则执行给定的函数并返回其结果。
      *
@@ -87,7 +89,9 @@ public class ApiUtil {
             return null;
         }
     }
+    //endregion
 
+    //region 点位数据 数据结构转换
     /**
      * 根据标签名将列表中的第一个数据项转换为映射
      * 此方法用于处理每个数据项的单个样本值
@@ -207,7 +211,9 @@ public class ApiUtil {
         // 调用重载方法，使用默认的日期格式
         return convertFormatTimeByTagNames(data, DatePattern.NORM_DATETIME_PATTERN);
     }
+    //endregion
 
+    //region 计算历史单元,获取查询时间各个参数
     /**
      * 根据给定的日期和时间单位计算历史单元的开始日期、结束日期、计数和间隔时间
      *
@@ -218,9 +224,12 @@ public class ApiUtil {
      * @param intervalUnit 间隔时间的时间单位
      * @return 返回一个包含开始日期、结束日期、计数和间隔时间毫秒数的HistorianUnit对象
      */
-    public static HistorianUnit calculateCountAndTimes(Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+    public static HistorianUnit calculateCountAndTimes(Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit, Boolean isRound) {
         // 确定结束日期，如果metaDate为null，则使用当前日期
         Date end = Optional.ofNullable(metaDate).orElse(new DateTime());
+        if (Optional.ofNullable(isRound).orElse(Boolean.FALSE)) {
+            end = getDateForRoundTime(end, intervalUnit, interval);
+        }
         Date begin = null;
         int count = 0;
 
@@ -239,8 +248,16 @@ public class ApiUtil {
         return new HistorianUnit().setCount(count).setBegin(begin).setEnd(end).setIntervalMs(intervalMs);
     }
 
+    public static HistorianUnit calculateCountAndTimes(Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        return calculateCountAndTimes(null, total, totalUnit, interval, intervalUnit, Boolean.FALSE);
+    }
+
+    public static HistorianUnit calculateCountAndTimes(int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit, Boolean isRound) {
+        return calculateCountAndTimes(null, total, totalUnit, interval, intervalUnit, isRound);
+    }
+
     public static HistorianUnit calculateCountAndTimes(int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
-        return calculateCountAndTimes(null, total, totalUnit, interval, intervalUnit);
+        return calculateCountAndTimes(null, total, totalUnit, interval, intervalUnit, Boolean.FALSE);
     }
 
     /**
@@ -267,7 +284,80 @@ public class ApiUtil {
         }
     }
 
+    /**
+     * 根据指定的时间单位，获取舍入时间后的日期对象
+     * 此方法用于获取当前日期时间，在指定时间单位上进行舍入后的结果
+     *
+     * @param timeUnit 时间单位，决定了时间舍入的精度
+     * @return 舍入时间后的日期对象
+     */
+    public static Date getDateForRoundTime(TimeUnit timeUnit) {
+        return getDateForRoundTime(new Date(), timeUnit, 5);
+    }
 
+    /**
+     * 根据指定的时间单位和舍入单位，获取舍入时间后的日期对象
+     * 此方法允许指定当前日期时间，在指定时间单位上进行自定义步长的舍入
+     *
+     * @param timeUnit 时间单位，决定了时间舍入的精度
+     * @param unit     舍入的步长单位，表示在指定时间单位上的增量
+     * @return 舍入时间后的日期对象
+     */
+    public static Date getDateForRoundTime(TimeUnit timeUnit, Integer unit) {
+        return getDateForRoundTime(new Date(), timeUnit, unit);
+    }
+
+    /**
+     * 根据指定的日期、时间单位和舍入单位，获取舍入时间后的日期对象
+     * 此方法允许对给定的日期时间，在指定时间单位上进行自定义步长的舍入
+     *
+     * @param date     需要进行舍入的日期时间对象
+     * @param timeUnit 时间单位，决定了时间舍入的精度
+     * @param unit     舍入的步长单位，表示在指定时间单位上的增量
+     * @return 舍入时间后的日期对象
+     */
+    public static Date getDateForRoundTime(Date date, TimeUnit timeUnit, Integer unit) {
+        // 如果传入的日期不为空，则更新为当前日期时间
+        if (ObjectUtil.isNotEmpty(date)) {
+            date = new Date();
+        }
+        String formateStr = "";
+        String dateStr = "";
+        Integer payload = 0;
+
+        // 根据不同的时间单位，设置日期格式字符串和获取当前时间单位内的偏移量
+        if (timeUnit == TimeUnit.SECONDS) {
+            formateStr = DatePattern.NORM_DATETIME_PATTERN;
+            dateStr = DateUtil.format(date, DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+            payload = DateUtil.second(date);
+        } else if (timeUnit == TimeUnit.MINUTES) {
+            formateStr = DatePattern.NORM_DATETIME_MINUTE_PATTERN;
+            dateStr = DateUtil.format(date, "yyyy-MM-dd HH");
+            payload = DateUtil.minute(date);
+        } else if (timeUnit == TimeUnit.HOURS) {
+            return DateUtil.beginOfHour(date);
+        } else if (timeUnit == TimeUnit.DAYS) {
+            return DateUtil.parse(DateUtil.formatDateTime(date) + " 08:00:00", DatePattern.NORM_DATETIME_PATTERN);
+        }
+
+        // 如果单位大于60或小于等于0，则不进行舍入，直接返回原日期对象
+        if (unit > 60 || unit <= 0) {
+            return date;
+        }
+        // 计算在当前时间单位内，偏移量与舍入单位的模数，以确定如何进行舍入
+        int unitMod = (payload % unit);
+        int load = payload - unitMod;
+
+        // 将计算后的偏移量格式化为两位字符串，并拼接到日期字符串中
+        String resultStr = StrUtil.padPre(Convert.toStr(load), 2, "0");
+        dateStr += ":" + resultStr;
+        // 根据最终的日期字符串和日期格式，解析并返回新的日期对象
+        return DateUtil.parse(dateStr, formateStr);
+    }
+
+    //endregion
+
+    //region 根据类注解的点位参数，填充对象属性
     /**
      * 根据时间参数填充对象的值
      * 该方法通过反射和映射关系，将特定时间点的数据填充到对象的相应字段中
@@ -611,12 +701,11 @@ public class ApiUtil {
                 break;
             }
         }
-        // 如果找到了两位有效数字，则截取到该位置
+        // 如果没有有效数字，返回整数部分
         if (lastSignificantIndex == -1) {
-            // 如果没有有效数字，返回整数部分
             return integerPart; //StrUtil.padAfter("", scale, "0")
         }
-
+        // 如果找到了两位有效数字，则截取到该位置
         int subLength = lastSignificantIndex + scale;
         String resultStr = "";
         if (subLength > decimalPartLength) {
@@ -627,5 +716,6 @@ public class ApiUtil {
         resultStr = StrUtil.trim(resultStr, 1, character -> character == '0');
         return integerPart + "." + resultStr;
     }
+    //endregion
 
 }
