@@ -169,9 +169,14 @@ public class ApiUtil {
      * @return Date对象列表，表示转换后的时间
      */
     public static List<Date> convertTimeByTagNames(List<DataItem> data) {
+        List<Sample> samples = data
+                .stream()
+                .filter(item -> CollUtil.isNotEmpty(item.getSamples()))
+                .findFirst()
+                .orElse(new DataItem().setSamples(ListUtil.empty()))
+                .getSamples();
         // 使用流处理，安全地处理可能为空的情况，并将时间戳转换为Date对象
-        List<Date> dataList = Optional.ofNullable(data.get(0).getSamples())
-                .orElse(ListUtil.empty())
+        List<Date> dataList = samples
                 .stream()
                 .map(Sample::getTimeStamp)
                 .collect(Collectors.toList());
@@ -188,9 +193,14 @@ public class ApiUtil {
      * @return 字符串列表，表示按照指定格式转换后的时间
      */
     public static List<String> convertFormatTimeByTagNames(List<DataItem> data, String format) {
+        List<Sample> samples = data
+                .stream()
+                .filter(item -> CollUtil.isNotEmpty(item.getSamples()))
+                .findFirst()
+                .orElse(new DataItem().setSamples(ListUtil.empty()))
+                .getSamples();
         // 使用流处理，安全地处理可能为空的情况，并将时间戳转换为指定格式的字符串
-        List<String> dataList = Optional.ofNullable(data.get(0).getSamples())
-                .orElse(ListUtil.empty())
+        List<String> dataList = samples
                 .stream()
                 .map(Sample::getTimeStamp)
                 .map(date -> DateUtil.format(date, format))
