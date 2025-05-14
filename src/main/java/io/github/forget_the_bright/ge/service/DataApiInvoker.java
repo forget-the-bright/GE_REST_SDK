@@ -404,39 +404,73 @@ public class DataApiInvoker {
                 historianUnit.getIntervalMs());
     }
 
+    /**
+     * 根据插值方法获取历史数据区间值
+     * 该方法用于通过插值方式获取指定标签在特定时间范围内的数据
+     *
+     * @param tagNames     标签名称，用于查询数据
+     * @param metaDate     起始日期时间，表示数据查询的开始时间
+     * @param total        总的时间范围
+     * @param totalUnit    总时间单位，用于定义总的时间范围
+     * @param interval     数据间隔
+     * @param intervalUnit 数据间隔的时间单位
+     * @return 返回包含插值数据的DataResult对象
+     */
     public static DataResult getHistorianIntervalValueByInterpolated(String tagNames, Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        // 计算历史数据单元，包括开始时间、结束时间、间隔等信息
         HistorianUnit historianUnit = ApiUtil.calculateCountAndTimes(metaDate, total, totalUnit, interval, intervalUnit);
+        // 设置偏移量，用于调整计算的样本数量
         int offset = 1;
+        // 计算并设置样本数量
         Integer count = historianUnit.getCount() + offset;
+        // 计算结束时间，并设置到历史数据单元中
         DateTime endTime = DateUtil.offset(metaDate, ApiUtil.convertToDateField(intervalUnit), offset);
         historianUnit.setCount(count).setEnd(endTime);
+        // 调用方法获取插值数据
         DataResult interpolatedByRequestParamPost = getInterpolatedByRequestParamPost(
                 new TagNamesEntity().setTagNames(tagNames),
                 historianUnit.getBegin(),
                 historianUnit.getEnd(),
                 historianUnit.getCount(),
                 historianUnit.getIntervalMs());
+        // 获取插值数据项列表
         List<DataItem> data = interpolatedByRequestParamPost.getData();
-
+        // 获取当前值数据
+        DataResult currentValuePost = DataApiInvoker.getCurrentValuePost(new TagNamesEntity().setTagNames(tagNames));
+        // 将当前值数据转换为map形式，便于后续处理
+        Map<String, Object> currentData = ApiUtil.convertOneDataByTagNames(currentValuePost.getData(), "0", 2);
+        // 获取当前时间
+        DateTime nowTime = new DateTime();
+        // 遍历数据项列表，处理每个数据项
         for (DataItem datum : data) {
             List<Sample> samples = datum.getSamples();
             List<Sample> realSamples = new ArrayList<>();
+            // 遍历样本数据，进行插值计算
             for (int i = 0; i < samples.size(); i++) {
                 Sample currentSample = samples.get(i);
                 Sample nextSample = samples.get(i + 1);
+                // 将当前样本和下一个样本的质量和值转换为Double类型
                 Double currentValue = Convert.toDouble(currentSample.getQuality() == Quality.BAD ? "0" : currentSample.getValue(), 0.0);
                 Double nextValue = Convert.toDouble(nextSample.getQuality() == Quality.BAD ? "0" : nextSample.getValue(), 0.0);
+                // 如果当前样本时间在当前时间之前，且下一个样本时间在当前时间之后，使用当前值数据进行插值
+                if (currentSample.getTimeStamp().before(nowTime) && nextSample.getTimeStamp().after(nowTime)) {
+                    nextValue = Convert.toDouble(currentData.get(datum.getTagName()), 0.0);
+                }
+                // 计算插值后的值，并保留两位小数
                 String sumValue = ApiUtil.retainSignificantDecimals(String.valueOf(nextValue - currentValue), 2);
                 currentSample.setValue(sumValue);
                 realSamples.add(currentSample);
+                // 如果达到最后一个样本，跳出循环
                 if (i == samples.size() - (1 + offset)) {
                     break;
                 }
             }
             datum.setSamples(realSamples);
         }
+        // 返回处理后的插值数据
         return interpolatedByRequestParamPost;
     }
+
 
     /**
      * 根据总和标签获取区间值
