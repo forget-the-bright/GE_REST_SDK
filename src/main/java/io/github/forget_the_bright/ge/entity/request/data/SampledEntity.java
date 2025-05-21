@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.request.data;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.config.UTCDateSerializer;
 import io.github.forget_the_bright.ge.constant.common.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -64,7 +65,7 @@ public class SampledEntity {
      * 示例: "2023-10-01T12:00:00Z"<br>
      * 释义: 表示查询的时间范围结束的时间点。
      */
-    @JSONField(name = "end", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "end", serializeUsing = UTCDateSerializer.class)
     private Date endTime;
 
     /**
@@ -149,7 +150,7 @@ public class SampledEntity {
      * 示例: "2023-10-01T11:00:00Z"<br>
      * 释义: 表示查询的时间范围开始的时间点。
      */
-    @JSONField(name = "start", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "start", serializeUsing = UTCDateSerializer.class)
     private Date startTime;
 
     /**

@@ -11,6 +11,7 @@ import io.github.forget_the_bright.ge.core.LocalTimedCacheHolder;
 import io.github.forget_the_bright.ge.core.TokenHolder;
 import io.github.forget_the_bright.ge.core.print.PrintUtil;
 import io.github.forget_the_bright.ge.entity.request.data.DataSampleEntity;
+import io.github.forget_the_bright.ge.entity.request.data.SampledEntity;
 import io.github.forget_the_bright.ge.entity.response.DataResult;
 import io.github.forget_the_bright.ge.service.DataApiInvoker;
 
@@ -46,7 +47,8 @@ public class Main {
 
         //TagsResult jsonObject1 = TagsApiInvoker.queryTagsByPath(10, "*");
 
-
+        SampledEntity sampledEntity = new SampledEntity().setStartTime(new DateTime());
+        String jsonString = JSONObject.toJSONString(sampledEntity, SerializerFeature.WriteEnumUsingToString);
         DataResult currentValueByPathVariable = DataApiInvoker.getCurrentValueByPathVariable("DL.FCS0202.1TI1031B_PV");
         DataResult calculatedByRequestParam = DataApiInvoker.getCalculatedByRequestParam(
                 "DL.FCS0202.1TI1031B_PV",

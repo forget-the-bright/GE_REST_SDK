@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.request.alarm;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.config.UTCDateSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -39,7 +40,7 @@ public class AlarmDeleteBackupEntity {
      * 示例: "2023-10-01T12:00:00Z" 或 "1696152000"<br>
      * 释义: 定义报警或事件的时间范围的结束时间点。
      */
-    @JSONField(name = "EndTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "EndTime", serializeUsing = UTCDateSerializer.class)
     private Date endTime;
 
     /**
@@ -64,6 +65,6 @@ public class AlarmDeleteBackupEntity {
      * 示例: "2023-10-01T00:00:00Z" 或 "1696065600"<br>
      * 释义: 定义报警或事件的时间范围的起始时间点。
      */
-    @JSONField(name = "StartTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "StartTime", serializeUsing = UTCDateSerializer.class)
     private Date startTime;
 }

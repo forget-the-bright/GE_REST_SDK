@@ -472,6 +472,69 @@ public class DataApiInvoker {
     }
 
 
+    public static DataResult getHistorianIntervalValueBySampled(String tagNames, Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        // 计算历史数据单元，包括开始时间、结束时间、间隔等信息
+        HistorianUnit historianUnit = ApiUtil.calculateCountAndTimes(metaDate, total, totalUnit, interval, intervalUnit);
+        // 设置偏移量，用于调整计算的样本数量
+        int offset = 1;
+        // 计算并设置样本数量
+        Integer count = historianUnit.getCount() + offset;
+        // 计算结束时间，并设置到历史数据单元中
+        DateTime endTime = DateUtil.offset(metaDate, ApiUtil.convertToDateField(intervalUnit), offset);
+        historianUnit.setCount(count).setEnd(endTime);
+        // 调用方法获取插值数据
+        SampledEntity sampledEntity = new SampledEntity()
+                .setSamplingMode(SamplingMode.Interpolated) //获取插值模式
+                .setStartTime(historianUnit.getBegin())
+                .setEndTime(historianUnit.getEnd())
+                .setIntervalMs(historianUnit.getIntervalMs())
+                .setQueryModifier(1L)//补全模式
+                .setTagNames(tagNames);
+        DataResult interpolatedByRequestParamPost = DataApiInvoker.getSampledByRequestParamPost(sampledEntity);
+
+        // 获取插值数据项列表
+        List<DataItem> data = interpolatedByRequestParamPost.getData();
+        // 获取当前值数据
+
+        DataResult currentGoodValuePost = DataApiInvoker.getSampledByRequestParamPost(new SampledEntity()
+                .setSamplingMode(SamplingMode.CurrentValue)
+                .setQueryModifier(1L)
+                .setTagNames(tagNames));
+        // 将当前值数据转换为map形式，便于后续处理
+        Map<String, Object> currentData = ApiUtil.convertOneDataByTagNames(currentGoodValuePost.getData(), "0", 2);
+        // 获取当前时间
+        DateTime nowTime = new DateTime();
+        // 遍历数据项列表，处理每个数据项
+        for (DataItem datum : data) {
+            List<Sample> samples = datum.getSamples();
+            List<Sample> realSamples = new ArrayList<>();
+            // 遍历样本数据，进行插值计算
+            for (int i = 0; i < samples.size(); i++) {
+                Sample currentSample = samples.get(i);
+                Sample nextSample = samples.get(i + 1);
+                // 将当前样本和下一个样本的质量和值转换为Double类型
+                Double currentValue = Convert.toDouble(currentSample.getQuality() == Quality.BAD ? "0" : currentSample.getValue(), 0.0);
+                Double nextValue = Convert.toDouble(nextSample.getQuality() == Quality.BAD ? "0" : nextSample.getValue(), 0.0);
+                // 如果当前样本时间在当前时间之前，且下一个样本时间在当前时间之后，使用当前值数据进行插值
+                if (currentSample.getTimeStamp().before(nowTime) && nextSample.getTimeStamp().after(nowTime)) {
+                    nextValue = Convert.toDouble(currentData.get(datum.getTagName()), 0.0);
+                }
+                // 计算插值后的值，并保留两位小数
+                String sumValue = ApiUtil.retainSignificantDecimals(String.valueOf(nextValue - currentValue), 2);
+                currentSample.setValue(sumValue);
+                realSamples.add(currentSample);
+                // 如果达到最后一个样本，跳出循环
+                if (i == samples.size() - (1 + offset)) {
+                    break;
+                }
+            }
+            datum.setSamples(realSamples);
+        }
+        // 返回处理后的插值数据
+        return interpolatedByRequestParamPost;
+    }
+
+
     /**
      * 根据总和标签获取区间值
      * 该方法用于计算指定标签在给定时间区间内的变化量，即结束时间的值减去开始时间的值
@@ -487,33 +550,12 @@ public class DataApiInvoker {
         List<String> tagNameLists = Arrays.stream(tagNames.split(";")).collect(Collectors.toList());
 
         // 检查每个标签名称是否以_SUM结尾，如果不是，则抛出异常
-   /*     tagNameLists.forEach(tagName -> {
-            if (!StrUtil.endWith(tagName, "_SUM")) {
-                throw new RuntimeException("tagName must end with _SUM");
-            }
-        });*/
 
-        // 处理开始时间，如果start为null，则使用当前时间
-        Date startBegin = ApiUtil.isNullExec(start, () -> start);
-        // 计算开始时间的结束点，即开始时间加上1秒
-        Date startEnd = ApiUtil.isNullExec(start, () -> DateUtil.offsetSecond(start, 1));
-
-        // 处理结束时间，如果end为null，则使用当前时间
-        Date endBegin = ApiUtil.isNullExec(end, () -> end);
-        // 计算结束时间的结束点，即结束时间加上1秒
-        Date endEnd = ApiUtil.isNullExec(end, () -> DateUtil.offsetSecond(end, 1));
- /*       DateTime dateTime = new DateTime();
-        if (startBegin.after(dateTime)) {
-            throw new RuntimeException("开始时间不能在未来");
-        }
-
-        if (dateTime.after(endBegin)) {
-            throw new RuntimeException("结束时间不能在未来");
-        }*/
-        // 获取开始时间区间的数据
-        DataResult interpolatedBegin = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), startBegin, startEnd, 1, 1L);
+        // 获取时间区间的第一个良好的样本值
+        DataResult calculatedFirstRawValue = getCalculatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), 1, start, end, CalculationMode.FirstRawValue, 1L);
+        //DataResult interpolatedBegin = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), startBegin, startEnd, 1, 1L);
         // 将获取的数据转换为映射，键为标签名，值为标签值的双精度浮点数
-        Map<String, BigDecimal> beginSum = ApiUtil.convertOneDataByTagNames(interpolatedBegin.getData())
+        Map<String, BigDecimal> beginSum = ApiUtil.convertOneDataByTagNames(calculatedFirstRawValue.getData())
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
@@ -521,9 +563,10 @@ public class DataApiInvoker {
                 }));
 
         // 获取结束时间区间的数据
-        DataResult interpolatedEnd = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), endBegin, endEnd, 1, 1L);
+        DataResult calculatedLastRawValue = getCalculatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), 1, start, end, CalculationMode.LastRawValue, 1L);
+        //DataResult interpolatedEnd = getInterpolatedByRequestParamPost(new TagNamesEntity().setTagNames(tagNames), endBegin, endEnd, 1, 1L);
         // 同样将获取的数据转换为映射
-        Map<String, BigDecimal> endSum = ApiUtil.convertOneDataByTagNames(interpolatedEnd.getData())
+        Map<String, BigDecimal> endSum = ApiUtil.convertOneDataByTagNames(calculatedLastRawValue.getData())
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
@@ -643,6 +686,63 @@ public class DataApiInvoker {
                 DataApiEnum.GET_RAW_DATA_BY_PATH_VARIABLE,
                 params
         );
+    }
+
+    /**
+     * 根据插值方式获取历史数据
+     *
+     * @param tagNames      标签名称，用于指定需要查询的数据类型
+     * @param historianUnit 历史数据单元，包含查询的时间范围、数据点数量和时间间隔
+     * @return 返回查询到的历史数据结果
+     */
+    public static DataResult getHistorianDataByRawData(String tagNames, HistorianUnit historianUnit) {
+        return getRawDataByRequestParamPost(
+                new TagNamesEntity().setTagNames(tagNames),
+                historianUnit.getBegin(),
+                historianUnit.getEnd(),
+                Direction.Forward,
+                historianUnit.getCount());
+    }
+
+    /**
+     * 根据插值方式获取历史数据，通过总时间长度和间隔来计算查询参数
+     *
+     * @param tagNames     标签名称，用于指定需要查询的数据类型
+     * @param total        总时间长度的值
+     * @param totalUnit    总时间长度的时间单位
+     * @param interval     间隔的时间长度值
+     * @param intervalUnit 间隔的时间长度的时间单位
+     * @return 返回查询到的历史数据结果
+     */
+    public static DataResult getHistorianDataByRawData(String tagNames, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        HistorianUnit historianUnit = ApiUtil.calculateCountAndTimes(total, totalUnit, interval, intervalUnit);
+        return getRawDataByRequestParamPost(
+                new TagNamesEntity().setTagNames(tagNames),
+                historianUnit.getBegin(),
+                historianUnit.getEnd(),
+                Direction.Forward,
+                historianUnit.getCount());
+    }
+
+    /**
+     * 根据插值方式获取历史数据，通过特定日期和总时间长度、间隔来计算查询参数
+     *
+     * @param tagNames     标签名称，用于指定需要查询的数据类型
+     * @param metaDate     特定日期，用于计算查询的时间范围
+     * @param total        总时间长度的值
+     * @param totalUnit    总时间长度的时间单位
+     * @param interval     间隔的时间长度值
+     * @param intervalUnit 间隔时间长度的时间单位
+     * @return 返回查询到的历史数据结果
+     */
+    public static DataResult getHistorianDataByRawData(String tagNames, Date metaDate, int total, TimeUnit totalUnit, int interval, TimeUnit intervalUnit) {
+        HistorianUnit historianUnit = ApiUtil.calculateCountAndTimes(metaDate, total, totalUnit, interval, intervalUnit);
+        return getRawDataByRequestParamPost(
+                new TagNamesEntity().setTagNames(tagNames),
+                historianUnit.getBegin(),
+                historianUnit.getEnd(),
+                Direction.Forward,
+                historianUnit.getCount());
     }
 
 

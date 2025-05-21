@@ -165,7 +165,12 @@ public enum CalculationMode {
      * 从指定间隔内存储的档案中检索标签的统计信息。
      */
     @ApiModelProperty(value = "TagStats: 21, 从指定间隔内存储的档案中检索标签的统计信息")
-    TagStats(21);
+    TagStats(21),
+
+    @ApiModelProperty(value = "SumValue: 24, 从指定间隔结束时间值-开始时间值,得到区间累计值")
+    SumValue(24),
+
+    ;
 
     private final int value;
 

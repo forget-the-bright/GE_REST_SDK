@@ -56,12 +56,17 @@ public class EnumParamArgumentResolver implements HandlerMethodArgumentResolver 
 
         String convertMethod = annotation.value();
 
+        boolean required = annotation.required();
+
         // 获取参数的类信息
         Class<?> parameterType = parameter.getParameterType();
         if (!parameterType.isEnum()) {
             throw new IllegalArgumentException("EnumParam注解只能用于枚举类型");
         }
         if (StrUtil.isBlank(value)) {
+            if (!required) {// 参数为空，且required为false，返回null
+                return null;
+            }
             throw new IllegalArgumentException("EnumParam所注解的参数值不能为空");
         }
 

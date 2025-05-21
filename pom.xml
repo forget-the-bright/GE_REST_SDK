@@ -6,7 +6,7 @@
 
     <groupId>io.github.forget-the-bright</groupId>
     <artifactId>GE_REST_SDK</artifactId>
-    <version>1.0.5.9</version>
+    <version>1.0.6</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -81,45 +81,6 @@
             <scope>provided</scope>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
-            <version>${hutool.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>${poi.version}</version>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.59</version>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
@@ -136,6 +97,7 @@
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
 
@@ -173,6 +135,121 @@
         </repository>
     </distributionManagement>
 
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                    <optional>true</optional>
+                    <scope>provided</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>cn.hutool</groupId>
+                    <artifactId>hutool-all</artifactId>
+                    <optional>true</optional>
+                    <scope>provided</scope>
+                    <version>${hutool.version}</version>
+                </dependency>
+
+
+                <dependency>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi-ooxml</artifactId>
+                    <version>${poi.version}</version>
+                    <optional>true</optional>
+                    <scope>provided</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                    <version>1.2.59</version>
+                    <optional>true</optional>
+                    <scope>provided</scope>
+                </dependency>
+
+
+            </dependencies>
+        </profile>
+        <profile>
+            <id>run</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                    <optional>true</optional>
+                </dependency>
+
+                <dependency>
+                    <groupId>cn.hutool</groupId>
+                    <artifactId>hutool-all</artifactId>
+                    <optional>true</optional>
+                    <version>${hutool.version}</version>
+                </dependency>
+
+
+                <dependency>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi-ooxml</artifactId>
+                    <version>${poi.version}</version>
+                    <optional>true</optional>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                    <version>1.2.59</version>
+                    <optional>true</optional>
+                </dependency>
+
+
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version> <!-- 请使用最新版本 -->
+                        <executions>
+                            <execution>
+                                <id>unique-id-2</id>
+                                <!--必须这个阶段，validate代码还未编译完成，第一次运行会报类不存在的现象，故需使用compile这个阶段-->
+                                <!-- 指定在哪个阶段执行
+                                process-classes 类编译完成之后，适合运行 main 方法 , 使用 mvn process-classes
+                                compile	编译阶段，有时也适用 , 使用 mvn compile
+                                validate	构建最开始阶段，此时类还没编译，不推荐 , 使用 mvn validate
+                                -->
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <phase>compile</phase>
+                                <configuration>
+                                    <mainClass>io.github.forget_the_bright.Main</mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -279,10 +356,13 @@
                         <option>-dontshrink</option> <!--默认开启，不做收缩（删除注释、未被引用代码）-->
                         <option>-dontoptimize</option><!--默认是开启的，这里关闭字节码级别的优化-->
                         <option>-adaptclassstrings</option><!--混淆类名之后，对使用Class.forName('className')之类的地方进行相应替代-->
-                        <option>-ignorewarnings</option><!-- 忽略warn消息,如果提示org.apache.http.* 这个包里的类有问题，那么就加入下述代码：-keep class org.apache.http.** { *; }    -dontwarn org.apache.http.**-->
+                        <option>-ignorewarnings
+                        </option><!-- 忽略warn消息,如果提示org.apache.http.* 这个包里的类有问题，那么就加入下述代码：-keep class org.apache.http.** { *; }    -dontwarn org.apache.http.**-->
                         <option>-keep class org.apache.logging.log4j.util.* { *; }</option>
                         <option>-dontwarn org.apache.logging.log4j.util.**</option>
-                        <option>-keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod</option><!--对异常、注解信息在runtime予以保留，不然影响springboot启动-->
+                        <option>-keepattributes
+                            Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+                        </option><!--对异常、注解信息在runtime予以保留，不然影响springboot启动-->
 
                         <!-- 保留service包中的所有类 -->
                         <option>-keep class io.github.forget_the_bright.ge.service.** { *; }</option>
@@ -290,7 +370,7 @@
                         <option>-keep class io.github.forget_the_bright.ge.entity.** { *; }</option>
 
                         <option>-keep class io.github.forget_the_bright.ge.config.** { *; }</option>
-<!--                        <option>-keep !@interface com.alibaba.fastjson.annotation.JSONField { *; }</option>-->
+                        <!--                        <option>-keep !@interface com.alibaba.fastjson.annotation.JSONField { *; }</option>-->
                         <!-- 保留所有interface接口的名称 -->
                         <option>-keepnames interface ** { *; }</option>
 
@@ -300,7 +380,8 @@
                         <!-- 保留service包中的方法参数名称 -->
                         <option>-keepclassmembers class io.github.forget_the_bright.ge.service.** {
                             public protected *;
-                            }</option>
+                            }
+                        </option>
 
                         <!-- 保留带有特定注解的类成员 -->
                         <option>-keepclassmembers class * {
@@ -341,9 +422,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
         </plugins>
     </build>
-
 
 </project>

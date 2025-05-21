@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.request.alarm;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.config.UTCDateSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -27,7 +28,7 @@ public class AlarmQueryInfoEntity {
      * 示例: "2023-10-01T12:00:00Z"<br>
      * 释义: 表示报警被用户或系统确认的时间点。
      */
-    @JSONField(name = "AckTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "AckTime", serializeUsing = UTCDateSerializer.class)
     private Date ackTime;
 
     /**
@@ -100,7 +101,7 @@ public class AlarmQueryInfoEntity {
      * 示例: "2023-10-01T12:05:00Z"<br>
      * 释义: 表示查询的时间范围结束的时间点。
      */
-    @JSONField(name = "EndTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "EndTime", serializeUsing = UTCDateSerializer.class)
     private Date endTime;
 
     /**
@@ -197,7 +198,7 @@ public class AlarmQueryInfoEntity {
      * 示例: "2023-10-01T12:00:00Z"<br>
      * 释义: 表示查询的时间范围开始的时间点。
      */
-    @JSONField(name = "StartTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "StartTime", serializeUsing = UTCDateSerializer.class)
     private Date startTime;
 
     /**
@@ -210,7 +211,7 @@ public class AlarmQueryInfoEntity {
      * 示例: "2023-10-01T12:02:00Z"<br>
      * 释义: 表示报警状态从一个状态转换到另一个状态的时间点。
      */
-    @JSONField(name = "StateTransitionTime", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "StateTransitionTime", serializeUsing = UTCDateSerializer.class)
     private Date stateTransitionTime;
 
     /**

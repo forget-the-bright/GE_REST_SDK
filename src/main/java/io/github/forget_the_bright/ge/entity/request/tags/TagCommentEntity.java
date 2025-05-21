@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.request.tags;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.config.UTCDateSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -51,6 +52,6 @@ public class TagCommentEntity {
      * 示例: "2023-10-01T12:00:00Z"<br>
      * 释义: 表示评论创建的时间点。
      */
-    @JSONField(name = "timeStamp", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "timeStamp", serializeUsing = UTCDateSerializer.class)
     private Date timeStamp;
 }

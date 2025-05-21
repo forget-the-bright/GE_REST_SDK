@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.request.data;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.config.UTCDateSerializer;
 import io.github.forget_the_bright.ge.constant.common.Quality;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,7 +41,7 @@ public class DataSampleEntity {
      * 示例: "2023-10-01T12:00:00Z"<br>
      * 释义: 表示数据样本生成的时间点。
      */
-    @JSONField(name = "TimeStamp", format = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JSONField(name = "TimeStamp", serializeUsing = UTCDateSerializer.class)
     private Date timeStamp;
 
     /**
