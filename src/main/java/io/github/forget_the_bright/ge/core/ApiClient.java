@@ -288,23 +288,23 @@ public class ApiClient {
      */
     private static Object handleResponse(HttpRequest request, Enum<?> apiEnum) {
         HttpResponse response = request.execute();
-        log.debug("API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+        log.debug("发送GE-API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
 
         // 处理未授权的情况，清除令牌以便重新获取
         if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
             TokenHolder.clearToken();
             //  重新执行请求
             response = request.execute();
-            log.debug("API请求刷新token后重新执行: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+            log.debug("GE-API请求刷新token后重新执行: {} {}\n{}", request.getMethod(), request.getUrl(), request);
         }
 
         // 检查HTTP状态码是否为200（OK）
         if (response.getStatus() != HttpStatus.HTTP_OK) {
-            throw new ApiException("API调用失败: " + response.getStatus() + " - " + response.body());
+            throw new ApiException("GE-API调用失败: " + response.getStatus() + " - " + response.body());
         }
         // 记录响应日志
         String responseBody = response.body();
-        log.debug("API响应: {}", responseBody);
+        log.debug("GE-API响应: {}", responseBody);
 
         // 获取返回类型并解析响应体
         Class<?> returnType = getReturnType(apiEnum);
