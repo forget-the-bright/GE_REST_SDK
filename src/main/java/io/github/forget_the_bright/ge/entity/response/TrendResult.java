@@ -1,6 +1,7 @@
 package io.github.forget_the_bright.ge.entity.response;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.github.forget_the_bright.ge.entity.response.base.BaseResult;
 import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.TrendItem;
 import lombok.Data;
@@ -18,7 +19,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
-public class TrendResult {
+public class TrendResult extends BaseResult {
     /**
      * Data: A list of data items returned by the server.
      * 数据列表：服务器返回的数据项列表。

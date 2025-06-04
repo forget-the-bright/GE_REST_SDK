@@ -308,9 +308,11 @@ public class ApiClient {
 
         // 获取返回类型并解析响应体
         Class<?> returnType = getReturnType(apiEnum);
+
         if (returnType == null) {
             return JSONObject.parseObject(responseBody);
         }
+
         return JSONObject.parseObject(responseBody, returnType);
     }
 

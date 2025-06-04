@@ -255,6 +255,9 @@ public class ApiUtil {
         // 计算计数，通过总时间除以间隔时间得到
         long totalDurationInMinutes = totalUnit.toSeconds(total);
         long intervalDurationInMinutes = intervalUnit.toSeconds(interval);
+        if (intervalDurationInMinutes > totalDurationInMinutes) {
+            throw new ApiException("间隔时间不能大于总时间");
+        }
         count = (int) (totalDurationInMinutes / intervalDurationInMinutes);
 
         // 计算间隔时间的毫秒数

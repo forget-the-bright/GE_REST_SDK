@@ -18,6 +18,7 @@ import io.github.forget_the_bright.ge.entity.request.data.TagDataCreationEntity;
 import io.github.forget_the_bright.ge.entity.request.data.TrendEntity;
 import io.github.forget_the_bright.ge.entity.request.tags.TagNamesEntity;
 import io.github.forget_the_bright.ge.entity.response.DataResult;
+import io.github.forget_the_bright.ge.entity.response.TrendResult;
 import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.Sample;
 
@@ -424,7 +425,7 @@ public class DataApiInvoker {
         // 计算并设置样本数量
         Integer count = historianUnit.getCount() + offset;
         // 计算结束时间，并设置到历史数据单元中
-        DateTime endTime = DateUtil.offset(metaDate, ApiUtil.convertToDateField(intervalUnit), offset);
+        DateTime endTime = DateUtil.offset(metaDate, ApiUtil.convertToDateField(intervalUnit), interval);
         historianUnit.setCount(count).setEnd(endTime);
         // 调用方法获取插值数据
         DataResult interpolatedByRequestParamPost = getInterpolatedByRequestParamPost(
@@ -480,7 +481,7 @@ public class DataApiInvoker {
         // 计算并设置样本数量
         Integer count = historianUnit.getCount() + offset;
         // 计算结束时间，并设置到历史数据单元中
-        DateTime endTime = DateUtil.offset(metaDate, ApiUtil.convertToDateField(intervalUnit), offset);
+        DateTime endTime = DateUtil.offset(metaDate, ApiUtil.convertToDateField(intervalUnit), interval);
         historianUnit.setCount(count).setEnd(endTime);
         // 调用方法获取插值数据
         SampledEntity sampledEntity = new SampledEntity()
@@ -837,18 +838,18 @@ public class DataApiInvoker {
      * @param tagNames             标签名称，用于标识数据
      * @return 返回包含趋势数据的DataResult对象
      */
-    public static DataResult getTrendDataByRequestParam(CalculationMode calculationMode,
-                                                        Integer count,
-                                                        Direction direction,
-                                                        Date end,
-                                                        String filterExpression,
-                                                        FilterMode filterMode,
-                                                        Long intervalMs,
-                                                        Long queryModifier,
-                                                        SamplingMode samplingMode,
-                                                        Date start,
-                                                        String statisticsItemFilter,
-                                                        String tagNames) {
+    public static TrendResult getTrendDataByRequestParam(CalculationMode calculationMode,
+                                                         Integer count,
+                                                         Direction direction,
+                                                         Date end,
+                                                         String filterExpression,
+                                                         FilterMode filterMode,
+                                                         Long intervalMs,
+                                                         Long queryModifier,
+                                                         SamplingMode samplingMode,
+                                                         Date start,
+                                                         String statisticsItemFilter,
+                                                         String tagNames) {
         // 创建一个参数映射，用于存储所有请求参数
         Map<String, Object> params = new HashMap<>();
         // 将计算模式放入参数映射
@@ -889,7 +890,7 @@ public class DataApiInvoker {
      * @param trendEntity 包含趋势数据信息的实体对象
      * @return 返回趋势数据的JSON对象
      */
-    public static DataResult getTrendDataByRequestParamPost(TrendEntity trendEntity) {
+    public static TrendResult getTrendDataByRequestParamPost(TrendEntity trendEntity) {
         return ApiClient.execute(
                 ApiModule.DATA,
                 DataApiEnum.GET_TREND_DATA_BY_REQUEST_PARAM_POST,

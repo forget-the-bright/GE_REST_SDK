@@ -61,6 +61,6 @@ public class TrendItem {
      * 使用JSONField注解将该字段映射到JSON对象中的"Trend"字段
      */
     @JSONField(name = "Trend")
-    private List<Sample> trend;
+    private List<List<Trend>> trend;
 
 }
