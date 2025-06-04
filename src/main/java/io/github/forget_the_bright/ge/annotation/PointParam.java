@@ -4,6 +4,7 @@ import io.github.forget_the_bright.ge.constant.common.ValueType;
 
 import java.lang.annotation.*;
 import java.lang.reflect.Field;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用于标记和提供点参数信息的注解
@@ -68,6 +69,27 @@ public @interface PointParam {
     String simpleExpression() default "";
 
     int scale() default 2;
+
+    /**
+     * PV 走瞬时值接口
+     * SUM 走累计值接口
+     */
+    String queryType() default "PV";
+
+    /**
+     * 计算累计的开始小时
+     */
+    int sumMetaHour() default 8;
+
+    /**
+     * 计算累计的时间单位
+     */
+    TimeUnit sumMetaUnit() default TimeUnit.DAYS;
+
+    /**
+     * 累计值接口的间隔时间
+     */
+    int sumMetaInterval() default 1;
 
     /**
      * 值类型

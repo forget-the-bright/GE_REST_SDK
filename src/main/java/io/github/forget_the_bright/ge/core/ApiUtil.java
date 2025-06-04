@@ -21,6 +21,7 @@ import io.github.forget_the_bright.ge.entity.response.base.DataItem;
 import io.github.forget_the_bright.ge.entity.response.base.Sample;
 import io.github.forget_the_bright.ge.exception.ApiException;
 import io.github.forget_the_bright.ge.service.DataApiInvoker;
+import org.bouncycastle.asn1.cmp.OOBCertHash;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -443,12 +444,21 @@ public class ApiUtil {
     public static void fillValForObjByPointParam(Object obj, Date date, String defaultValue, Integer type, Boolean cover) {
         // 获取对象的类信息
         Class<?> aClass = obj.getClass();
+
         // 获取类中字段与时间序列点的映射关系
         LinkedHashMap<Field, String> fieldPointByPointParam = getFieldPointByPointParam(aClass);
+
+        Map<String, List<Map.Entry<Field, String>>> queryTypeFieldPointParam = fieldPointByPointParam
+                .entrySet()
+                .stream()
+                .collect(Collectors.groupingBy(entry -> entry.getKey().getAnnotation(PointParam.class).queryType()));
+
+        // region 计算瞬时值的逻辑
+        Map<Field, String> pvFieldPointByPointParam = queryTypeFieldPointParam.get("PV").stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 创建一个双向映射，以便于后续根据字段或时间序列点获取对应关系
-        BiMap<Field, String> biMap = new BiMap<>(fieldPointByPointParam);
+        BiMap<Field, String> biMap = new BiMap<>(pvFieldPointByPointParam);
         // 将所有时间序列点合并为一个字符串，用于查询
-        String tagNames = fieldPointByPointParam.values().stream().collect(Collectors.joining(";"));
+        String tagNames = pvFieldPointByPointParam.values().stream().collect(Collectors.joining(";"));
         // 调用API根据时间范围和时间序列点获取插值数据
         DataResult dataResult = null;
         if (ObjectUtil.isNotEmpty(type) || type == 1) {
@@ -472,24 +482,51 @@ public class ApiUtil {
         // 将查询到的数据转换为一个映射，便于后续填充到对象中
         Map<String, Object> valueMap = convertOneDataByTagNames(dataResult.getData(), defaultValue);
         // 遍历数据映射，将数据填充到对象的相应字段中
-        for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
-            // 根据时间序列点获取对应的字段
-            Field field = biMap.getKey(entry.getKey());
-            if (ObjectUtil.isEmpty(field)) continue;
-            String fieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(obj, field), "").toString();
-            // 字段值不为空,不赋值,跳过
-            if (StrUtil.isNotEmpty(fieldValue.toString()) && !cover) continue;
-            // 获取字段值
-            Object tagValue = entry.getValue();
-            PointParam annotation = field.getAnnotation(PointParam.class);
-            String simpleExpression = annotation.simpleExpression();
-            if (StrUtil.isNotEmpty(simpleExpression)) {
-                String formatExpress = StrUtil.format(simpleExpression, tagValue);
-                tagValue = ExpressionUtil.eval(formatExpress, new HashMap<>());
-            }
-            tagValue = retainSignificantDecimals(ObjectUtil.toString(tagValue), annotation.scale());
-            // 使用反射将值设置到对象的字段中
-            ReflectUtil.setFieldValue(obj, field, tagValue);
+        fillValForObj(valueMap, biMap, obj, cover);
+        //endregion
+
+        // region 计算累计值的逻辑
+        if (CollUtil.isEmpty(queryTypeFieldPointParam.get("SUM"))) return;
+
+        Map<Field, String> sumFieldPointByPointParam = queryTypeFieldPointParam.get("SUM").stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        Map<String, List<Map.Entry<Field, String>>> groupSumFieldPoint = sumFieldPointByPointParam.entrySet().stream().collect(Collectors.groupingBy(entry -> {
+            PointParam annotation = entry.getKey().getAnnotation(PointParam.class);
+            int beginHour = annotation.sumMetaHour();
+            TimeUnit timeUnit = annotation.sumMetaUnit();
+            int interval = annotation.sumMetaInterval();
+            return StrUtil.format("{},{},{}", beginHour, timeUnit.name(), interval);
+        }));
+
+
+        for (String key : groupSumFieldPoint.keySet()) {
+            Map<Field, String> entrys = groupSumFieldPoint.get(key).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            BiMap<Field, String> biMapEntrys = new BiMap(entrys);
+            String tagNamesBySum = entrys.values().stream().collect(Collectors.joining(";"));
+
+            List<String> split = StrUtil.split(key, ",");
+            Integer hour = Convert.toInt(split.get(0));
+            TimeUnit timeUnit = Convert.toEnum(TimeUnit.class, split.get(1));
+            Integer interval = Convert.toInt(split.get(2));
+            DateTime endTime = DateUtil.offsetHour(
+                    DateUtil.beginOfDay(ObjectUtil.defaultIfNull(date, new Date())),
+                    hour);
+
+
+            DateTime beginTime = DateUtil.offset(endTime, convertToDateField(timeUnit), -interval);
+            Map<String, String> intervalValueBySumTag = DataApiInvoker.getIntervalValueBySumTag(tagNamesBySum, beginTime, endTime);
+            fillValForObj(intervalValueBySumTag, biMapEntrys, obj, cover);
+
+        }
+
+        // endregion
+    }
+
+    private static void fillValForObj(Map<String, ?> valueMap, BiMap<Field, String> biMap, Object obj, Boolean cover) {
+        for (String tagName : valueMap.keySet()) {
+            Object tagValue = valueMap.get(tagName);
+            Field field = biMap.getKey(tagName);
+            fillValueByObj(field, obj, tagValue, cover);
         }
     }
 
@@ -622,7 +659,15 @@ public class ApiUtil {
         Class<?> aClass = obj.getClass();
         // 获取类中字段与时间序列点的映射关系
         LinkedHashMap<Field, List<String>> fieldPointsByPointParam = getFieldPointsByPointParam(aClass);
-        String tagNames = fieldPointsByPointParam.values().stream().flatMap(list -> list.stream()).collect(Collectors.joining(";"));
+        Map<String, List<Map.Entry<Field, List<String>>>> queryTypeFieldPointParam = fieldPointsByPointParam.entrySet()
+                .stream().collect(Collectors.groupingBy(entry -> entry.getKey().getAnnotation(PointParam.class).queryType()));
+
+
+        // region 计算瞬时值的逻辑
+        Map<Field, List<String>> pvFieldPointByPointParam = queryTypeFieldPointParam.get("PV").stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+
+        String tagNames = pvFieldPointByPointParam.values().stream().flatMap(list -> list.stream()).collect(Collectors.joining(";"));
         // 调用API根据时间范围和时间序列点获取插值数据
         DataResult dataResult = null;
 
@@ -646,11 +691,52 @@ public class ApiUtil {
         }
         // 将查询到的数据转换为一个映射，便于后续填充到对象中
         Map<String, Object> valueMap = convertOneDataByTagNames(dataResult.getData(), defaultValue);
+        fillValueForObjs(pvFieldPointByPointParam, valueMap, objs, cover);
+
+        //endregion
+
+        //region 计算累计值的逻辑
+        if (CollUtil.isEmpty(queryTypeFieldPointParam.get("SUM"))) return;
+        Map<Field, List<String>> sumFieldPointByPointParam = queryTypeFieldPointParam.get("SUM").stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        Map<String, List<Map.Entry<Field, List<String>>>> groupSumFieldPoint = sumFieldPointByPointParam.entrySet().stream().collect(Collectors.groupingBy(entry -> {
+            PointParam annotation = entry.getKey().getAnnotation(PointParam.class);
+            int beginHour = annotation.sumMetaHour();
+            TimeUnit timeUnit = annotation.sumMetaUnit();
+            int interval = annotation.sumMetaInterval();
+            return StrUtil.format("{},{},{}", beginHour, timeUnit.name(), interval);
+        }));
+
+        for (String sumTimeParam : groupSumFieldPoint.keySet()) {
+            Map<Field, List<String>> sumFieldPointByPointItem = groupSumFieldPoint.get(sumTimeParam).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            String sumTagNames = sumFieldPointByPointItem.values().stream().flatMap(list -> list.stream()).collect(Collectors.joining(";"));
+
+            List<String> split = StrUtil.split(sumTimeParam, ",");
+            Integer hour = Convert.toInt(split.get(0));
+            TimeUnit timeUnit = Convert.toEnum(TimeUnit.class, split.get(1));
+            Integer interval = Convert.toInt(split.get(2));
+            DateTime endTime = DateUtil.offsetHour(
+                    DateUtil.beginOfDay(ObjectUtil.defaultIfNull(date, new Date())),
+                    hour);
+
+
+            DateTime beginTime = DateUtil.offset(endTime, convertToDateField(timeUnit), -interval);
+            Map<String, String> intervalValueBySumTag = DataApiInvoker.getIntervalValueBySumTag(sumTagNames, beginTime, endTime);
+            fillValueForObjs(sumFieldPointByPointItem, intervalValueBySumTag, objs, cover);
+        }
+        //endregion
+    }
+
+    private static <T> void fillValueForObjs(Map<Field, List<String>> fieldPointByPointParam, Map<String, ?> valueMap, List<T> objs, boolean cover) {
+        if (CollUtil.isEmpty(objs)) return;
+        // 获取第一个对象用于后续获取类信息
+        T obj = objs.get(0);
+        // 获取对象的类信息
+        Class<?> aClass = obj.getClass();
         // 遍历每个字段及其对应的时间序列点
-        fieldPointsByPointParam.forEach((field, points) -> {
+        fieldPointByPointParam.forEach((field, points) -> {
             // 获取字段上的PointParam注解
             PointParam annotation = field.getAnnotation(PointParam.class);
-            String simpleExpression = annotation.simpleExpression();
             // 获取注解中指定的字段名
             String fieldName = annotation.fieldName();
             // 根据字段名获取字段
@@ -670,21 +756,34 @@ public class ApiUtil {
                 for (T item : objs) {
                     // 获取判断字段值
                     Object itemFieldValue = ReflectUtil.getFieldValue(item, fieldByName);
-                    // 获取字段值
-                    String relFieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(item, field), "").toString();
                     // 如果判断字段值不匹配跳过
                     if (!itemFieldValue.equals(fieldValue)) continue;
-                    // 如果字段值不为空，则跳过
-                    if (StrUtil.isNotEmpty(relFieldValue) && !cover) continue;
-                    if (StrUtil.isNotEmpty(simpleExpression)) {
-                        String formatExpress = StrUtil.format(simpleExpression, tagValue);
-                        tagValue = ExpressionUtil.eval(formatExpress, new HashMap<>());
-                    }
-                    tagValue = retainSignificantDecimals(ObjectUtil.toString(tagValue), annotation.scale());
-                    ReflectUtil.setFieldValue(item, field, tagValue);
+                    fillValueByObj(field, item, tagValue, cover);
                 }
             }
         });
+    }
+
+    private static void fillValueByObj(Field field, Object obj, Object tagValue, Boolean cover) {
+        if (ObjectUtil.isEmpty(field)) return;
+        if (ObjectUtil.isEmpty(tagValue)) return;
+        String fieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(obj, field), "").toString();
+        // 字段值不为空,不赋值,跳过
+        if ((StrUtil.isNotEmpty(fieldValue) && !cover)
+                && !("0.00".equals(fieldValue) || "0".equals(fieldValue))) {
+            // 如果字段值不为0.00或者0，则不赋值
+            return;
+        }
+        // 获取字段值
+        PointParam annotation = field.getAnnotation(PointParam.class);
+        String simpleExpression = annotation.simpleExpression();
+        if (StrUtil.isNotEmpty(simpleExpression)) {
+            String formatExpress = StrUtil.format(simpleExpression, tagValue);
+            tagValue = ExpressionUtil.eval(formatExpress, new HashMap<>());
+        }
+        tagValue = retainSignificantDecimals(ObjectUtil.toString(tagValue), annotation.scale());
+        // 使用反射将值设置到对象的字段中
+        ReflectUtil.setFieldValue(obj, field, tagValue);
     }
 
     /**
