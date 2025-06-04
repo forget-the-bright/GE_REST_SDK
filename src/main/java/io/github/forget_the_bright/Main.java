@@ -1,6 +1,8 @@
 package io.github.forget_the_bright;
 
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.expression.ExpressionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.github.forget_the_bright.ge.config.ApiConfig;
@@ -16,6 +18,7 @@ import io.github.forget_the_bright.ge.entity.response.DataResult;
 import io.github.forget_the_bright.ge.service.DataApiInvoker;
 
 import java.util.Date;
+import java.util.HashMap;
 
 
 //TIP 要<b>运行</b>代码，请按 <shortcut actionId="Run"/> 或
@@ -24,6 +27,9 @@ public class Main {
     public static void main(String[] args) {
         //TIP 当文本光标位于高亮显示的文本处时按 <shortcut actionId="ShowIntentionActions"/>
         // 查看 IntelliJ IDEA 建议如何修正。
+        String expression = "1+1";
+        Object eval = ExpressionUtil.eval(expression, new HashMap<>());
+        System.out.println(StrUtil.format("eval[{}]: {}",expression,  eval));
         System.out.printf("Hello and welcome!");
 
         String s = ApiUtil.retainSignificantDecimals("112.0901100", 2);

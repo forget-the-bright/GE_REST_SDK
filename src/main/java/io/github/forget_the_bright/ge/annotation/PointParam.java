@@ -32,6 +32,7 @@ public @interface PointParam {
      * @return String[] 返回一个字符串数组，包含了一组特定的值
      */
     String[] values() default {};
+
     /**
      * 默认提供一个空字符串数组，用于获取字段的值
      * 这个方法主要用于获取与字段相关的值的数组
@@ -45,6 +46,7 @@ public @interface PointParam {
      * 默认值为空字符串，表示在没有特别配置时，它将返回一个空的字符串
      */
     String fieldName() default "";
+
     /**
      * 车间的标识
      * 用于指定参数所属的车间
@@ -62,6 +64,10 @@ public @interface PointParam {
      * @return 站点编号
      */
     String stationNo() default "";
+
+    String simpleExpression() default "";
+
+    int scale() default 2;
 
     /**
      * 值类型

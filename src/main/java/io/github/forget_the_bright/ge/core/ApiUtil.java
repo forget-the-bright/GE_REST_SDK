@@ -7,11 +7,14 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.*;
 import cn.hutool.core.map.BiMap;
 import cn.hutool.core.util.*;
+import cn.hutool.extra.expression.ExpressionUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.github.forget_the_bright.ge.annotation.PointParam;
 import io.github.forget_the_bright.ge.constant.common.Quality;
+import io.github.forget_the_bright.ge.constant.common.SamplingMode;
 import io.github.forget_the_bright.ge.constant.common.ValueType;
 import io.github.forget_the_bright.ge.entity.HistorianUnit;
+import io.github.forget_the_bright.ge.entity.request.data.SampledEntity;
 import io.github.forget_the_bright.ge.entity.request.tags.TagNamesEntity;
 import io.github.forget_the_bright.ge.entity.response.DataResult;
 import io.github.forget_the_bright.ge.entity.response.base.DataItem;
@@ -43,6 +46,7 @@ import java.util.stream.Collectors;
 public class ApiUtil {
 
     //region 空处理方法
+
     /**
      * 如果对象为 null 或空，则返回 null；否则执行给定的函数并返回其结果。
      *
@@ -92,6 +96,7 @@ public class ApiUtil {
     //endregion
 
     //region 点位数据 数据结构转换
+
     /**
      * 根据标签名将列表中的第一个数据项转换为映射
      * 此方法用于处理每个数据项的单个样本值
@@ -224,6 +229,7 @@ public class ApiUtil {
     //endregion
 
     //region 计算历史单元,获取查询时间各个参数
+
     /**
      * 根据给定的日期和时间单位计算历史单元的开始日期、结束日期、计数和间隔时间
      *
@@ -368,18 +374,70 @@ public class ApiUtil {
     //endregion
 
     //region 根据类注解的点位参数，填充对象属性
+
+    /**
+     * 根据类注解的点位参数，填充对象属性
+     * 默认走获取当前时间最新值去填充
+     *
+     * @param obj 要填充数据的对象
+     */
+    public static void fillValForObjByPointParam(Object obj) {
+        fillValForObjByPointParam(obj, new Date(), "0", 1, false);
+    }
+
+    public static void fillValForObjByPointParam(Object obj, String defaultValue) {
+        fillValForObjByPointParam(obj, new Date(), defaultValue, 1, false);
+    }
+
+    /**
+     * 根据类注解的点位参数，填充对象属性
+     * 默认走获取当前时间样本插值去填充
+     *
+     * @param obj  要填充数据的对象
+     * @param date 用于查询数据的时间点
+     */
+    public static void fillValForObjByPointParam(Object obj, Date date) {
+        fillValForObjByPointParam(obj, date, "0", 2, false);
+    }
+
+    public static void fillValForObjByPointParam(Object obj, Date date, String defaultValue) {
+        fillValForObjByPointParam(obj, date, defaultValue, 2, false);
+    }
+
     /**
      * 根据时间参数填充对象的值
      * 该方法通过反射和映射关系，将特定时间点的数据填充到对象的相应字段中
      *
      * @param obj  要填充数据的对象
      * @param date 用于查询数据的时间点
+     * @param type 数据获取类型：
+     *             <ul>
+     *                 <li>{@code 1}: 获取当前最新 Good 值</li>
+     *                 <li>{@code >=2}: 获取指定时间点的样本插值</li>
+     *             </ul>
      */
-    public static void fillValForObjByPointParam(Object obj, Date date) {
-        fillValForObjByPointParam(obj, date, "0");
+    public static void fillValForObjByPointParam(Object obj, Date date, Integer type) {
+        fillValForObjByPointParam(obj, date, "0", type, false);
     }
 
-    public static void fillValForObjByPointParam(Object obj, Date date, String defaultValue) {
+    /**
+     * 根据时间参数填充对象的值。
+     *
+     * <p>该方法通过反射和映射关系，将特定时间点的数据填充到对象的相应字段中。
+     * 支持根据指定类型选择查询当前最新 Good 值或样本插值。</p>
+     *
+     * @param obj          要填充数据的对象，不能为 null
+     * @param date         用于查询数据的时间点，若为 null 则使用当前时间
+     * @param defaultValue 如果查询结果为空时使用的默认值
+     * @param type         数据获取类型：
+     *                     <ul>
+     *                         <li>{@code 1}: 获取当前最新 Good 值</li>
+     *                         <li>{@code >=2}: 获取指定时间点的样本插值</li>
+     *                     </ul>
+     * @param cover        是否在对象字段有值的情况下覆盖
+     * @throws ApiException 如果注解信息不完整、点位号重复或调用 API 出现异常
+     */
+    public static void fillValForObjByPointParam(Object obj, Date date, String defaultValue, Integer type, Boolean cover) {
         // 获取对象的类信息
         Class<?> aClass = obj.getClass();
         // 获取类中字段与时间序列点的映射关系
@@ -387,31 +445,48 @@ public class ApiUtil {
         // 创建一个双向映射，以便于后续根据字段或时间序列点获取对应关系
         BiMap<Field, String> biMap = new BiMap<>(fieldPointByPointParam);
         // 将所有时间序列点合并为一个字符串，用于查询
-        String points = fieldPointByPointParam.values().stream().collect(Collectors.joining(";"));
+        String tagNames = fieldPointByPointParam.values().stream().collect(Collectors.joining(";"));
         // 调用API根据时间范围和时间序列点获取插值数据
-        DataResult interpolatedByRequestParamPost = DataApiInvoker
-                .getInterpolatedByRequestParamPost(
-                        new TagNamesEntity().setTagNames(points),
-                        date,
-                        date,
-                        1,
-                        1L);
+        DataResult dataResult = null;
+        if (ObjectUtil.isNotEmpty(type) || type == 1) {
+            SampledEntity sampledEntity = new SampledEntity()
+                    .setSamplingMode(SamplingMode.CurrentValue)
+                    .setQueryModifier(1L)
+                    .setTagNames(tagNames);
+            // 查询当前最新真值
+            dataResult = DataApiInvoker.getSampledByRequestParamPost(sampledEntity);
+        } else {
+            SampledEntity sampledEntity = new SampledEntity()
+                    .setSamplingMode(SamplingMode.Interpolated) //获取插值模式
+                    .setStartTime(date)
+                    .setEndTime(date)
+                    .setCount(1)
+                    .setIntervalMs(1L)
+                    .setQueryModifier(1L)//补全真值
+                    .setTagNames(tagNames);
+            dataResult = DataApiInvoker.getSampledByRequestParamPost(sampledEntity);
+        }
         // 将查询到的数据转换为一个映射，便于后续填充到对象中
-        Map<String, Object> valueMap = convertOneDataByTagNames(interpolatedByRequestParamPost.getData(), defaultValue);
+        Map<String, Object> valueMap = convertOneDataByTagNames(dataResult.getData(), defaultValue);
         // 遍历数据映射，将数据填充到对象的相应字段中
         for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
             // 根据时间序列点获取对应的字段
             Field field = biMap.getKey(entry.getKey());
-            if (field != null) {
-                // 获取字段值
-                Object value = entry.getValue();
-                String fieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(obj, field), "").toString();
-                // 字段值为空,就赋值
-                if (StrUtil.isEmpty(fieldValue.toString())) {
-                    // 使用反射将值设置到对象的字段中
-                    ReflectUtil.setFieldValue(obj, field, value);
-                }
+            if (ObjectUtil.isEmpty(field)) continue;
+            String fieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(obj, field), "").toString();
+            // 字段值不为空,不赋值,跳过
+            if (StrUtil.isNotEmpty(fieldValue.toString()) && !cover) continue;
+            // 获取字段值
+            Object tagValue = entry.getValue();
+            PointParam annotation = field.getAnnotation(PointParam.class);
+            String simpleExpression = annotation.simpleExpression();
+            if (StrUtil.isNotEmpty(simpleExpression)) {
+                String formatExpress = StrUtil.format(simpleExpression, tagValue);
+                tagValue = ExpressionUtil.eval(formatExpress, new HashMap<>());
             }
+            tagValue = retainSignificantDecimals(ObjectUtil.toString(tagValue), annotation.scale());
+            // 使用反射将值设置到对象的字段中
+            ReflectUtil.setFieldValue(obj, field, tagValue);
         }
     }
 
@@ -497,18 +572,42 @@ public class ApiUtil {
     }
 
 
+    //====================================================================================//
+
     public static <T> void fillValForObjsByPointParam(List<T> objs) {
-        fillValForObjsByPointParam(objs, new Date(), "0");
+        fillValForObjsByPointParam(objs, new Date(), "0", 1, false);
+    }
+
+    public static <T> void fillValForObjsByPointParam(List<T> objs, String defaultValue) {
+        fillValForObjsByPointParam(objs, new Date(), defaultValue, 1, false);
+    }
+
+    public static <T> void fillValForObjsByPointParam(List<T> objs, Date date) {
+        fillValForObjsByPointParam(objs, date, "0", 2, false);
+    }
+
+    public static <T> void fillValForObjsByPointParam(List<T> objs, Date date, String defaultValue) {
+        fillValForObjsByPointParam(objs, date, defaultValue, 2, false);
     }
 
     /**
-     * 根据时间序列点参数为对象列表填充值
+     * 根据时间序列点参数为对象列表填充值。
      *
-     * @param objs         对象列表，需要填充值的列表
-     * @param date         日期，用于获取数据的基准时间
-     * @param defaultValue 默认值，当获取的数据为空时使用的值
+     * <p>此方法通过反射机制，依据字段上的 {@link PointParam} 注解信息获取对应的时间序列点，并查询相关数据，
+     * 然后将查询到的数据填充至对象列表中相应的字段。</p>
+     *
+     * @param <T>          对象类型，必须是带有 {@link PointParam} 注解的类的实例
+     * @param objs         需要填充值的对象列表，若为空则直接返回不做任何操作
+     * @param date         查询数据的基准时间点。若为空，则使用当前时间
+     * @param defaultValue 若查询结果为空时使用的默认值
+     * @param type         数据获取类型：
+     *                     <ul>
+     *                         <li>{@code 1}: 获取当前最新 Good 值</li>
+     *                         <li>{@code >=2}: 获取指定时间点的样本插值</li>
+     *                     </ul>
+     * @param cover        是否在对象字段有值的情况下覆盖
      */
-    public static <T> void fillValForObjsByPointParam(List<T> objs, Date date, String defaultValue) {
+    public static <T> void fillValForObjsByPointParam(List<T> objs, Date date, String defaultValue, Integer type, Boolean cover) {
         // 检查对象列表是否为空，为空则直接返回
         if (CollUtil.isEmpty(objs)) return;
         // 检查日期是否为空，为空则使用当前日期
@@ -522,19 +621,33 @@ public class ApiUtil {
         LinkedHashMap<Field, List<String>> fieldPointsByPointParam = getFieldPointsByPointParam(aClass);
         String tagNames = fieldPointsByPointParam.values().stream().flatMap(list -> list.stream()).collect(Collectors.joining(";"));
         // 调用API根据时间范围和时间序列点获取插值数据
-        DataResult interpolatedByRequestParamPost = DataApiInvoker
-                .getInterpolatedByRequestParamPost(
-                        new TagNamesEntity().setTagNames(tagNames),
-                        date,
-                        date,
-                        1,
-                        1L);
+        DataResult dataResult = null;
+
+        if (ObjectUtil.isNotEmpty(type) || type == 1) {
+            SampledEntity sampledEntity = new SampledEntity()
+                    .setSamplingMode(SamplingMode.CurrentValue)
+                    .setQueryModifier(1L)
+                    .setTagNames(tagNames);
+            // 查询当前最新真值
+            dataResult = DataApiInvoker.getSampledByRequestParamPost(sampledEntity);
+        } else {
+            SampledEntity sampledEntity = new SampledEntity()
+                    .setSamplingMode(SamplingMode.Interpolated) //获取插值模式
+                    .setStartTime(date)
+                    .setEndTime(date)
+                    .setCount(1)
+                    .setIntervalMs(1L)
+                    .setQueryModifier(1L)//补全真值
+                    .setTagNames(tagNames);
+            dataResult = DataApiInvoker.getSampledByRequestParamPost(sampledEntity);
+        }
         // 将查询到的数据转换为一个映射，便于后续填充到对象中
-        Map<String, Object> valueMap = convertOneDataByTagNames(interpolatedByRequestParamPost.getData(), defaultValue);
+        Map<String, Object> valueMap = convertOneDataByTagNames(dataResult.getData(), defaultValue);
         // 遍历每个字段及其对应的时间序列点
         fieldPointsByPointParam.forEach((field, points) -> {
             // 获取字段上的PointParam注解
             PointParam annotation = field.getAnnotation(PointParam.class);
+            String simpleExpression = annotation.simpleExpression();
             // 获取注解中指定的字段名
             String fieldName = annotation.fieldName();
             // 根据字段名获取字段
@@ -546,20 +659,27 @@ public class ApiUtil {
             // 遍历每个时间序列点和对应的字段值
             for (int i = 0; i < points.size(); i++) {
                 String point = points.get(i);
-                String fieldValue = fieldValues.get(i);
                 // 获取对应时间序列点的数据
-                Object objValue = valueMap.get(point);
+                Object tagValue = valueMap.get(point);
+
+                String fieldValue = fieldValues.get(i);
                 // 遍历对象列表，为符合条件的对象填充字段值
-                objs.forEach(item -> {
+                for (T item : objs) {
                     // 获取判断字段值
                     Object itemFieldValue = ReflectUtil.getFieldValue(item, fieldByName);
                     // 获取字段值
                     String relFieldValue = ObjectUtil.defaultIfNull(ReflectUtil.getFieldValue(item, field), "").toString();
-                    // 如果判断字段值匹配且字段值为空，则填充字段值
-                    if (itemFieldValue.equals(fieldValue) && StrUtil.isEmpty(relFieldValue)) {
-                        ReflectUtil.setFieldValue(item, field, objValue);
+                    // 如果判断字段值不匹配跳过
+                    if (!itemFieldValue.equals(fieldValue)) continue;
+                    // 如果字段值不为空，则跳过
+                    if (StrUtil.isNotEmpty(relFieldValue) && !cover) continue;
+                    if (StrUtil.isNotEmpty(simpleExpression)) {
+                        String formatExpress = StrUtil.format(simpleExpression, tagValue);
+                        tagValue = ExpressionUtil.eval(formatExpress, new HashMap<>());
                     }
-                });
+                    tagValue = retainSignificantDecimals(ObjectUtil.toString(tagValue), annotation.scale());
+                    ReflectUtil.setFieldValue(item, field, tagValue);
+                }
             }
         });
     }

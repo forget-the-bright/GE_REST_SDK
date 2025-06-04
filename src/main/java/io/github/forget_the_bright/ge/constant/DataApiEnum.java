@@ -7,6 +7,7 @@ import io.github.forget_the_bright.ge.entity.request.data.SampledEntity;
 import io.github.forget_the_bright.ge.entity.request.data.TrendEntity;
 
 import io.github.forget_the_bright.ge.entity.response.DataResult;
+import io.github.forget_the_bright.ge.entity.response.TrendResult;
 import lombok.Getter;
 import lombok.ToString;
 import cn.hutool.http.Method;
@@ -182,14 +183,14 @@ public enum DataApiEnum {
             ParamPosition.QUERY,
             ParamPosition.NONE,
             null
-            , DataResult.class),
+            , TrendResult.class),
     GET_TREND_DATA_BY_REQUEST_PARAM_POST(
             "查询趋势数据",
             "/v1/datapoints/trend",
             Method.POST,
             ParamPosition.BODY,
             ParamPosition.NONE,
-            TrendEntity.class, DataResult.class
+            TrendEntity.class, TrendResult.class
     );
 
     private final String desc;
