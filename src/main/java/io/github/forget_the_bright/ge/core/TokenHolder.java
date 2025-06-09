@@ -66,7 +66,7 @@ public class TokenHolder {
      *
      * @return 有效的 Token
      */
-    public static String getValidToken() {
+    public static synchronized String getValidToken() {
         String token = cacheHolder.get(TOKEN_KEY);
         if (StrUtil.isBlank(token)) {
             token = refreshToken();
@@ -124,6 +124,18 @@ public class TokenHolder {
      * 从缓存中移除 Token。
      */
     public static void clearToken() {
+        cacheHolder.remove(TOKEN_KEY);
+        log.info("Token 缓存已清除");
+    }
+
+    public static synchronized void clearToken(String token) {
+        String realToken = cacheHolder.get(TOKEN_KEY);
+        if (StrUtil.isEmpty(realToken)) {
+            return;
+        }
+        if (!realToken.equals(token)) {
+            return;
+        }
         cacheHolder.remove(TOKEN_KEY);
         log.info("Token 缓存已清除");
     }

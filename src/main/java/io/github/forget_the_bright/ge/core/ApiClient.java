@@ -108,7 +108,7 @@ public class ApiClient {
         String fullUrl = buildUrl(module, apiEnum);
         HttpRequest request = createRequest(apiEnum, fullUrl, params, body);
         addAuthHeader(request, module);
-        return (T) handleResponse(request, apiEnum);
+        return (T) handleResponse(request, apiEnum, module);
     }
 
 
@@ -286,21 +286,30 @@ public class ApiClient {
      * @return 解析后的JSON响应，返回类型由API定义决定。
      * @throws ApiException 如果HTTP状态码不是200（OK），或在处理响应时发生其他异常。
      */
-    private static Object handleResponse(HttpRequest request, Enum<?> apiEnum) {
+    private static Object handleResponse(HttpRequest request, Enum<?> apiEnum, ApiModule module) {
         HttpResponse response = request.execute();
         log.debug("发送GE-API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
 
         // 处理未授权的情况，清除令牌以便重新获取
         if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
-            TokenHolder.clearToken();
-            //  重新执行请求
-            response = request.execute();
-            log.debug("GE-API请求刷新token后重新执行: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+            //  非OAuth模块才需要刷新令牌
+            if (!module.equals(ApiModule.OAUTH)) {
+                String authorization = request.headers().get("Authorization").stream().findFirst().orElse("");
+                String token = authorization;
+                if (authorization.startsWith("Bearer")) {
+                    token = StrUtil.removePrefix(authorization, "Bearer").trim();
+                }
+                TokenHolder.clearToken(token);
+                addAuthHeader(request, module);
+                //  重新执行请求
+                response = request.execute();
+                log.debug("GE-API请求刷新token后重新执行: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+            }
         }
 
         // 检查HTTP状态码是否为200（OK）
         if (response.getStatus() != HttpStatus.HTTP_OK) {
-            throw new ApiException("GE-API调用失败: " + response.getStatus() + " - " + response.body());
+            throw new ApiException(StrUtil.format("GE-API调用失败,地址:{}, 状态码:{}, \n 响应: {}", getPathFromEnum(apiEnum), response.getStatus(), response.body()));
         }
         // 记录响应日志
         String responseBody = response.body();
