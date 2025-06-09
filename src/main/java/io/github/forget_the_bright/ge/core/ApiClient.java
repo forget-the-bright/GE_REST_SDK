@@ -3,6 +3,7 @@ package io.github.forget_the_bright.ge.core;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.*;
 import cn.hutool.http.*;
 import com.alibaba.fastjson.JSONObject;
@@ -21,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * 通用API客户端，提供RESTful API请求的统一处理
@@ -287,29 +287,36 @@ public class ApiClient {
      * @throws ApiException 如果HTTP状态码不是200（OK），或在处理响应时发生其他异常。
      */
     private static Object handleResponse(HttpRequest request, Enum<?> apiEnum, ApiModule module) {
-        HttpResponse response = request.execute();
-        log.debug("发送GE-API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
+        HttpResponse response = null;
+        try {
+            response = request.execute();
+            log.debug("发送GE-API请求: {} {}\n{}", request.getMethod(), request.getUrl(), request);
 
-        // 处理未授权的情况，清除令牌以便重新获取
-        if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
-            //  非OAuth模块才需要刷新令牌
-            if (!module.equals(ApiModule.OAUTH)) {
-                String authorization = request.headers().get("Authorization").stream().findFirst().orElse("");
-                String token = authorization;
-                if (authorization.startsWith("Bearer")) {
-                    token = StrUtil.removePrefix(authorization, "Bearer").trim();
+            // 处理未授权的情况，清除令牌以便重新获取
+            if (response.getStatus() == HttpStatus.HTTP_UNAUTHORIZED) {
+                //  非OAuth模块才需要刷新令牌
+                if (!module.equals(ApiModule.OAUTH)) {
+                    String authorization = request.headers().get("Authorization").stream().findFirst().orElse("");
+                    String token = authorization;
+                    if (authorization.startsWith("Bearer")) {
+                        token = StrUtil.removePrefix(authorization, "Bearer").trim();
+                    }
+                    TokenHolder.clearToken(token);
+                    addAuthHeader(request, module);
+                    //  重新执行请求
+                    response = request.execute();
+                    log.debug("GE-API请求刷新token后重新执行: {} {}\n{}", request.getMethod(), request.getUrl(), request);
                 }
-                TokenHolder.clearToken(token);
-                addAuthHeader(request, module);
-                //  重新执行请求
-                response = request.execute();
-                log.debug("GE-API请求刷新token后重新执行: {} {}\n{}", request.getMethod(), request.getUrl(), request);
             }
+        } catch (Exception e) {
+            if (e instanceof IORuntimeException || e instanceof HttpException) {
+                throw new ApiException(StrUtil.format("GE-API调用失败,地址:{}, 错误内容: {}", getPathFromEnum(apiEnum), e.getMessage()), e);
+            }
+            throw e;
         }
-
         // 检查HTTP状态码是否为200（OK）
         if (response.getStatus() != HttpStatus.HTTP_OK) {
-            throw new ApiException(StrUtil.format("GE-API调用失败,地址:{}, 状态码:{}, \n 响应: {}", getPathFromEnum(apiEnum), response.getStatus(), response.body()));
+            throw new ApiException(StrUtil.format("GE-API调用失败,地址:{}, 状态码:{}, \n响应:\n {}", getPathFromEnum(apiEnum), response.getStatus(), response.body()));
         }
         // 记录响应日志
         String responseBody = response.body();
