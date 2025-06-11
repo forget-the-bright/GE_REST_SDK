@@ -937,14 +937,12 @@ public class ApiUtil {
         if (lastSignificantIndex == -1) {
             return integerPart; //StrUtil.padAfter("", scale, "0")
         }
-        // 如果找到了两位有效数字，则截取到该位置
+        // 如果找到了有效数字，则截取到该位置+scale位,保留有效位数
         int subLength = lastSignificantIndex + scale;
-        String resultStr = "";
-        if (subLength > decimalPartLength) {
-            resultStr = numberStr;
-        } else {
-            resultStr = decimalPart.substring(0, subLength);
+        if (subLength > decimalPartLength) {//如果小数部分长度小于截取长度，则直接返回原字符串
+           return numberStr;
         }
+        String  resultStr = decimalPart.substring(0, subLength);
         resultStr = StrUtil.trim(resultStr, 1, character -> character == '0');
         return integerPart + "." + resultStr;
     }
