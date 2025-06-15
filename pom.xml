@@ -19,6 +19,10 @@
         <swagger.core.version>1.6.2</swagger.core.version>
         <hutool.version>5.8.25</hutool.version>
         <poi.version>4.1.2</poi.version>
+        <lombok.version>1.18.30</lombok.version>
+        <fastjson.version>1.2.59</fastjson.version>
+        <junit.version>5.9.2</junit.version>
+
     </properties>
     <description>GE数据库 REST SDK</description>
     <url>https://github.com/forget-the-bright/GE_REST_SDK</url>
@@ -54,8 +58,42 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.core.version}</version>
-                <type>pom</type> <!-- 指明这是一个 POM 文件 -->
-                <scope>import</scope> <!-- 指定导入作用域 -->
+                <!--                <type>pom</type> &lt;!&ndash; 指明这是一个 POM 文件 &ndash;&gt;-->
+                <optional>true</optional>
+                <scope>provided</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <optional>true</optional>
+                <scope>provided</scope>
+                <version>${hutool.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+                <optional>true</optional>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -82,15 +120,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swagger.core.version}</version>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-
-
         <!-- Redis -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -99,6 +128,50 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+
+        <!--分割线-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
     </dependencies>
 
 
@@ -137,12 +210,14 @@
     </distributionManagement>
 
     <profiles>
+
         <profile>
-            <id>release</id>
+            <id>release-Deprecated-toGoRunJunit</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
+
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-web</artifactId>
@@ -170,22 +245,23 @@
                 <dependency>
                     <groupId>org.projectlombok</groupId>
                     <artifactId>lombok</artifactId>
+                    <version>${lombok.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>com.alibaba</groupId>
                     <artifactId>fastjson</artifactId>
-                    <version>1.2.59</version>
+                    <version>${fastjson.version}</version>
                     <optional>true</optional>
                     <scope>provided</scope>
                 </dependency>
-
 
             </dependencies>
         </profile>
+
         <profile>
-            <id>run</id>
+            <id>run-Deprecated-toGoRunJunit</id>
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
@@ -216,7 +292,7 @@
                 <dependency>
                     <groupId>com.alibaba</groupId>
                     <artifactId>fastjson</artifactId>
-                    <version>1.2.59</version>
+                    <version>${fastjson.version}</version>
                     <optional>true</optional>
                 </dependency>
 
@@ -250,13 +326,21 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
 
+    </profiles>
+    <!--打包命令复制-->
+    <!--清理环境 mvn clean -->
+    <!--清理环境 mvn compile -->
+    <!--关闭测试打包 mvn clean package -D"maven.test.skip"=true   -->
+    <!--关闭测试安装 mvn clean install -D"maven.test.skip"=true    -->
+    <!--关闭测试发布 mvn clean deploy -D"maven.test.skip"=true    -->
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <!-- 这里写不写版本都行,但是idea这里的mvn管理配置不是很完善有点sb,总是回给个错误提示,但是刷新就好了,这里加上版本就是避免错误提示 -->
+                <version>${spring.boot.version}</version>
                 <configuration>
                     <classifier>exec</classifier>
                     <!-- 不设置skip为false:打包的时候生成的jar包结构如下：BOOT-INF下包括了项目结构包和lib(依赖的代码jar包)，
@@ -282,7 +366,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
+                <version>3.2.7</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -292,6 +376,7 @@
                         </goals>
                         <configuration>
                             <keyname>${gpg.keyname}</keyname>
+                            <passphrase>${gpg.passphrase}</passphrase>
                         </configuration>
                     </execution>
                 </executions>
@@ -300,7 +385,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -314,7 +399,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>3.11.2</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -323,17 +408,79 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <source>1.8</source>
-                    <encoding>UTF-8</encoding>
-                </configuration>
             </plugin>
+            <!-- Step 1: 检测Java版本并设置相应属性 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
 
+                                <!-- 判断是否是 Java 8 -->
+                                <condition property="proguard.libraryjars"
+                                           value="${java.home}${file.separator}lib${file.separator}rt.jar">
+                                    <or>
+                                        <contains string="${java.version}" substring="1.8"/>
+                                    </or>
+                                </condition>
+
+                                <!-- 如果不是 Java 8，则执行此块 -->
+                                <condition property="proguard.libraryjars"
+                                           value="${java.home}${file.separator}jmods${file.separator}java.base.jmod">
+                                    <not>
+                                        <contains string="${java.version}" substring="1.8"/>
+                                    </not>
+                                </condition>
+
+                                <!-- 转换路径分隔符 -->
+                                <path id="libraryjars.path">
+                                    <pathelement path="${proguard.libraryjars}"/>
+                                </path>
+                                <pathconvert targetos="unix" property="proguard.libraryjars.forwardslash" refid="libraryjars.path"/>
+
+                                <!-- 写入属性文件 -->
+                                <echo file="${project.build.directory}/proguard.properties">
+                                    proguard.libraryjars=${proguard.libraryjars.forwardslash}
+                                </echo>
+                                <!-- 输出调试信息 -->
+                                <echo message="JDK library path: ${proguard.libraryjars}"/>
+                                <echo message="java.version: ${java.version}"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Step 2: 加载临时属性文件，注册为 Maven 属性 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${project.build.directory}/proguard.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- ProGuard混淆插件-->
             <plugin>
                 <groupId>com.github.wvengen</groupId>
                 <artifactId>proguard-maven-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>2.7.0</version>
                 <executions>
                     <execution>
                         <!-- 打包的时候开始混淆-->
@@ -407,11 +554,13 @@
                             public static void main(java.lang.String[]);
                             }
                         </option>
+                        <!-- 动态引用上面设置的 proguard.libraryjars -->
+                        <option>-libraryjars ${proguard.libraryjars}</option>
                     </options>
                     <libs>
                         <!-- 添加依赖 java8-->
-                        <lib>${java.home}/lib/rt.jar</lib>
-                        <lib>${java.home}/lib/jce.jar</lib>
+                        <!--                        <lib>${java.home}/lib/rt.jar</lib>-->
+                        <!--                        <lib>${java.home}/lib/jce.jar</lib>-->
                     </libs>
                 </configuration>
                 <dependencies>

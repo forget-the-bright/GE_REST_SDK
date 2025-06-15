@@ -4,6 +4,7 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.*;
 import cn.hutool.http.*;
 import com.alibaba.fastjson.JSONObject;
@@ -139,7 +140,7 @@ public class ApiClient {
         ParamPosition primaryParamPosition = getPrimaryParamPositionFromEnum(apiEnum);
         ParamPosition secondaryParamPosition = getSecondaryParamPositionFromEnum(apiEnum);
 
-        HttpRequest request = new HttpRequest(url)
+        HttpRequest request = new HttpRequest(UrlBuilder.ofHttp(url))
                 .setConnectionTimeout(config.getConnectionTimeout())
                 .setReadTimeout(config.getReadTimeout())
                 .method(method);
