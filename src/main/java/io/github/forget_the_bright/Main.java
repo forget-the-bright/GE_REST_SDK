@@ -1,8 +1,6 @@
 package io.github.forget_the_bright;
 
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.expression.ExpressionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.github.forget_the_bright.ge.config.ApiConfig;
@@ -22,7 +20,6 @@ import io.github.forget_the_bright.ge.entity.response.TrendResult;
 import io.github.forget_the_bright.ge.service.DataApiInvoker;
 
 import java.util.Date;
-import java.util.HashMap;
 
 
 //TIP 要<b>运行</b>代码，请按 <shortcut actionId="Run"/> 或

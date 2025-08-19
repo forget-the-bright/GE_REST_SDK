@@ -35,7 +35,8 @@ public class Trend {
 
     /**
      * 质量，表示数据的质量指标。
-     * 3 表示合格，其他值表示不合格（暂时考虑）。
+     * 这里GE返回的只有true和false,和其他接口的质量属性有区别。
+     * 该属性经过测试验证没有问题，确实只返回true和false。
      */
     @JSONField(name = "Quality")
     private Boolean quality;
